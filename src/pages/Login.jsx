@@ -1,0 +1,71 @@
+import React, { useState } from "react";
+import "../styles/Auth.css";
+
+function Login() {
+  const [form, setForm] = useState({
+    email: "",
+    password: "",
+  });
+
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const handleLogin = (e) => {
+    e.preventDefault();
+    console.log(form);
+  };
+
+  return (
+    <div className="auth-page">
+      <div className="auth-card">
+        <div className="auth-left">
+          <span className="auth-badge">Welcome Back</span>
+
+          <h1>
+            Login to your <span>Account</span>
+          </h1>
+
+          <p>
+            Continue your journey with alumni mentorship, events, jobs and forum
+            discussions.
+          </p>
+        </div>
+
+        <form className="auth-form" onSubmit={handleLogin}>
+          <h2>Login</h2>
+
+          <label>Email Address</label>
+          <input
+            type="email"
+            name="email"
+            placeholder="Enter your email"
+            value={form.email}
+            onChange={handleChange}
+            required
+          />
+
+          <label>Password</label>
+          <input
+            type="password"
+            name="password"
+            placeholder="Enter your password"
+            value={form.password}
+            onChange={handleChange}
+            required
+          />
+
+          <button className="auth-btn" type="submit">
+            Login
+          </button>
+
+          <p className="auth-link">
+            Don't have an account? <span>Sign Up</span>
+          </p>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+export default Login;
