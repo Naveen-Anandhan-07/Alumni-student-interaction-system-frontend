@@ -3,8 +3,14 @@ import Navbar from "../components/Navbar";
 import FeatureCard from "../components/FeatureCard";
 import StatCard from "../components/StatCard";
 import heroImage from "../assets/hero-graduation.png";
+import { useNavigate } from "react-router-dom";
 
 function Home() {
+  const navigate = useNavigate();
+
+  const handlesignUp= ()=>{
+    navigate("/signup");
+  }
   return (
     <div className="home-page">
       <Navbar />
@@ -25,7 +31,7 @@ function Home() {
           </p>
 
           <div className="hero-buttons">
-            <button className="btn primary large">Get Started →</button>
+            <button className="btn primary large" onClick={handlesignUp}>Get Started →</button>
             <button className="btn ghost large">Explore Features</button>
           </div>
 
