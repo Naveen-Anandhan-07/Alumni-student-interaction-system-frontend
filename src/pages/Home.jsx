@@ -66,13 +66,6 @@ function Home() {
         />
       </section>
 
-      <section className="stats-section">
-        <StatCard icon="👥" value="2,000+" label="Active Members" />
-        <StatCard icon="💼" value="800+" label="Job Opportunities" />
-        <StatCard icon="📅" value="150+" label="Events Organized" />
-        <StatCard icon="💬" value="1,200+" label="Forum Discussions" />
-      </section>
-
       <section className="how-section">
         <h2>
           How It <span>Works</span>

@@ -1,0 +1,243 @@
+.profile-page {
+  min-height: 100vh;
+  padding: 24px;
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 24px;
+  background:
+    radial-gradient(circle at top left, rgba(124, 92, 255, 0.28), transparent 30%),
+    radial-gradient(circle at top right, rgba(245, 95, 179, 0.2), transparent 28%),
+    linear-gradient(135deg, #f8f3ff, #fff0f7);
+}
+
+.profile-sidebar {
+  min-height: calc(100vh - 48px);
+  padding: 28px 20px;
+  border-radius: 34px;
+  background: rgba(31, 35, 64, 0.88);
+  backdrop-filter: blur(20px);
+  color: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: 0 28px 70px rgba(31, 35, 64, 0.28);
+}
+
+.logo {
+  font-size: 20px;
+  font-weight: 800;
+  margin-bottom: 36px;
+}
+
+.profile-sidebar nav {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.profile-sidebar nav span {
+  padding: 14px 16px;
+  border-radius: 18px;
+  color: rgba(255, 255, 255, 0.72);
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.profile-sidebar nav span.active,
+.profile-sidebar nav span:hover {
+  color: white;
+  background: rgba(255, 255, 255, 0.13);
+}
+
+.logout-btn {
+  border: none;
+  padding: 14px;
+  border-radius: 18px;
+  color: white;
+  font-weight: 800;
+  cursor: pointer;
+  background: linear-gradient(135deg, #ff7a59, #f55fb3);
+}
+
+.profile-main {
+  width: 100%;
+}
+
+.profile-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 22px;
+}
+
+.glass-card {
+  padding: 26px;
+  border-radius: 30px;
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(18px);
+  border: 1px solid rgba(124, 92, 255, 0.14);
+  box-shadow: 0 24px 60px rgba(110, 80, 255, 0.13);
+}
+
+.intro-card {
+  grid-column: span 3;
+  min-height: 250px;
+  text-align: left;
+}
+
+.small-title {
+  color: #6d5dfc;
+  font-weight: 800;
+  margin-bottom: 16px;
+}
+
+.intro-card h1 {
+  font-size: 48px;
+  color: #22264f;
+  margin-bottom: 18px;
+}
+
+.intro-card p {
+  max-width: 680px;
+  color: #687099;
+  line-height: 1.8;
+}
+
+.user-card {
+  grid-row: span 2;
+  text-align: center;
+}
+
+.avatar {
+  width: 92px;
+  height: 92px;
+  margin: 0 auto 18px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: white;
+  font-size: 28px;
+  font-weight: 800;
+  background: linear-gradient(135deg, #7c5cff, #f55fb3);
+  box-shadow: 0 18px 35px rgba(124, 92, 255, 0.3);
+}
+
+.user-card h2 {
+  color: #22264f;
+  margin-bottom: 8px;
+}
+
+.user-card p {
+  color: #687099;
+  font-size: 14px;
+  margin-top: 10px;
+}
+
+.line {
+  height: 1px;
+  background: rgba(109, 93, 252, 0.16);
+  margin: 18px 0;
+}
+
+.stat-box {
+  min-height: 150px;
+  text-align: left;
+}
+
+.stat-box h3,
+.wide-card h3 {
+  color: #22264f;
+  font-size: 18px;
+  margin-bottom: 14px;
+}
+
+.stat-box h2 {
+  font-size: 40px;
+  color: #6d5dfc;
+  margin-bottom: 8px;
+}
+
+.stat-box p {
+  color: #687099;
+  font-size: 14px;
+}
+
+.wide-card {
+  grid-column: span 2;
+  text-align: left;
+}
+
+.skill-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.skill-list span {
+  padding: 10px 16px;
+  border-radius: 18px;
+  color: #6d5dfc;
+  font-weight: 700;
+  background: rgba(109, 93, 252, 0.09);
+  border: 1px solid rgba(109, 93, 252, 0.14);
+}
+
+.list-item {
+  padding: 14px 0;
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  border-bottom: 1px solid rgba(109, 93, 252, 0.12);
+  color: #555d86;
+}
+
+.list-item:last-child {
+  border-bottom: none;
+}
+
+.list-item b {
+  color: #f55fb3;
+  font-size: 13px;
+}
+
+.profile-loading {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  font-size: 22px;
+  font-weight: 800;
+  color: #6d5dfc;
+}
+
+@media (max-width: 1000px) {
+  .profile-page {
+    grid-template-columns: 1fr;
+  }
+
+  .profile-sidebar {
+    min-height: auto;
+  }
+
+  .profile-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .intro-card,
+  .user-card,
+  .wide-card {
+    grid-column: span 1;
+  }
+
+  .intro-card h1 {
+    font-size: 36px;
+  }
+
+  .profile-loading {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  font-size: 22px;
+  font-weight: 800;
+  color: #6d5dfc;
+}
+}
+

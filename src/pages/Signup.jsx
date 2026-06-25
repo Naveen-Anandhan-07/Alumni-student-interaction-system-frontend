@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import "../styles/Auth.css";
+import { useNavigate } from "react-router-dom";
+import api from "../services/api";
 
 function Signup() {
   const [role, setRole] = useState("STUDENT");
@@ -16,20 +18,40 @@ function Signup() {
     skills: "",
   });
 
+  const navigate = useNavigate();
+
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
+  
+const handleSignup = async (e) => {
+  e.preventDefault();
 
-  const handleSignup = (e) => {
-    e.preventDefault();
-
-    const requestData = {
-      ...form,
-      role,
-    };
-
-    console.log(requestData);
+  const requestData = {
+    ...form,
+    role,
+    year: form.year ? Number(form.year) : null,
+    experience: form.experience ? Number(form.experience) : null,
   };
+
+  try {
+    const res = await api.post("/auth/signup", requestData);
+
+    localStorage.setItem("user", JSON.stringify(res.data));
+
+    if (res.data.role === "STUDENT") {
+      navigate("/student/profile");
+    } else {
+      navigate("/alumni/profile");
+    }
+  } catch (error) {
+    alert("Signup failed");
+    console.log(error);
+  }
+};
+const login= ()=>{
+  navigate("/login");
+}
 
   return (
     <div className="auth-page">
@@ -156,7 +178,7 @@ function Signup() {
           </button>
 
           <p className="auth-link">
-            Already have an account? <span>Login</span>
+            Already have an account? <span onClick={login}>Login</span>
           </p>
         </form>
       </div>

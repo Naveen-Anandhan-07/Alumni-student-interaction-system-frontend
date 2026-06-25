@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import "../styles/Auth.css";
+import { useNavigate } from "react-router-dom";
+import api from "../services/api";
 
 function Login() {
   const [form, setForm] = useState({
@@ -7,15 +9,34 @@ function Login() {
     password: "",
   });
 
+  const navigate = useNavigate();
+  
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleLogin = (e) => {
-    e.preventDefault();
-    console.log(form);
-  };
+  const handleLogin = async (e) => {
+  e.preventDefault();
 
+  try {
+    const res = await api.post("/auth/login", form);
+
+    localStorage.setItem("user", JSON.stringify(res.data));
+
+    if (res.data.role === "STUDENT") {
+      navigate("/student/profile");
+    } else {
+      navigate("/alumni/profile");
+    }
+  } catch (error) {
+    alert("Invalid email or password");
+    console.log(error);
+  }
+};
+
+const signUp = () =>{
+  navigate("/signup");
+}
   return (
     <div className="auth-page">
       <div className="auth-card">
@@ -60,7 +81,7 @@ function Login() {
           </button>
 
           <p className="auth-link">
-            Don't have an account? <span>Sign Up</span>
+            Don't have an account? <span onClick={signUp}>Sign Up</span>
           </p>
         </form>
       </div>
