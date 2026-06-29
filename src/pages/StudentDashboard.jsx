@@ -19,7 +19,7 @@ import "../styles/StudentDashboard.css";
 
 
 function StudentDashboard() {
-  const navigate = new useNavigate();
+  const navigate = useNavigate();
   const analytics = [
     {
       title: "Mentorship Requests",
@@ -113,7 +113,7 @@ function StudentDashboard() {
             <LayoutDashboard size={20} />
             Dashboard
           </a>
-          <a>
+          <a onClick={() => navigate("/student/profile")}>
             <User size={20} />
             Profile
           </a>
@@ -129,11 +129,11 @@ function StudentDashboard() {
             <CalendarDays size={20} />
             Events
           </a>
-          <a>
+          <a onClick={() => navigate("/forum")}>
             <MessageSquare size={20} />
             Forum
           </a>
-          <a>
+          <a onClick={() => navigate("/notifications")}>
             <Bell size={20} />
             Notifications
           </a>

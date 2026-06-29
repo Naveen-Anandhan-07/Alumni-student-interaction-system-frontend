@@ -1,6 +1,16 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 
 function Navbar() {
+    const navigate= useNavigate();
+
+    const handlesignUp= ()=>{
+    navigate("/signup");
+  }
+
+  const handleLogin= ()=>{
+    navigate("/login");
+  }
   return (
     <nav className="navbar">
       <div className="brand">
@@ -11,8 +21,8 @@ function Navbar() {
       
 
       <div className="nav-actions">
-        <button className="btn ghost">Login</button>
-        <button className="btn primary">Sign Up</button>
+        <button className="btn ghost" onClick={handleLogin}>Login</button>
+        <button className="btn primary" onClick={handlesignUp}>Sign Up</button>
       </div>
     </nav>
   );

@@ -17,10 +17,11 @@ import {
 } from "lucide-react";
 import api from "../services/api";
 import "../styles/StudentJobs.css";
+import { useNavigate } from "react-router-dom";
 
 function StudentJobs() {
   const studentId = 1;
-
+  const navigate = useNavigate();
   const [jobs, setJobs] = useState([]);
   const [applications, setApplications] = useState([]);
 
@@ -70,11 +71,11 @@ function StudentJobs() {
         </div>
 
         <nav className="sj-menu">
-          <a>
+          <a onClick={() => navigate("/student/dashboard")}>
             <LayoutDashboard size={20} />
             Dashboard
           </a>
-          <a>
+          <a onClick={() => navigate("/student/profile")}>
             <User size={20} />
             Profile
           </a>
@@ -86,19 +87,19 @@ function StudentJobs() {
             <Briefcase size={20} />
             Jobs / Internships
           </a>
-          <a>
+          <a onClick={() => navigate("/student/events")}>
             <CalendarDays size={20} />
             Events
           </a>
-          <a>
+          <a  onClick={() => navigate("/forum")}>
             <MessageSquare size={20} />
             Forum
           </a>
-          <a>
+          <a onClick={() => navigate("/notifications")}>
             <Bell size={20} />
             Notifications
           </a>
-          <a>
+          <a onClick={() => { localStorage.clear(); navigate("/login");}}>
             <LogOut size={20} />
             Logout
           </a>

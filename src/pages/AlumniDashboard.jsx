@@ -21,6 +21,12 @@ import "../styles/AlumniDashboard.css";
 
 function AlumniDashboard() {
   const navigate = useNavigate();
+  const handleLogout = () => {
+    localStorage.clear();
+    navigate("/login");
+  };
+  console.log("AlumniDashboard rendered");
+  
   const analytics = [
     {
       title: "Jobs Posted",
@@ -126,7 +132,7 @@ function AlumniDashboard() {
             <LayoutDashboard size={20} />
             Dashboard
           </a>
-          <a>
+          <a onClick={() => navigate("/alumni/profile")}>
             <User size={20} />
             Profile
           </a>
@@ -142,15 +148,15 @@ function AlumniDashboard() {
             <CalendarDays size={20} />
             Events
           </a>
-          <a>
+          <a onClick={() => navigate("/forum")}>
             <MessageSquare size={20} />
             Forum
           </a>
-          <a>
+          <a onClick={() => navigate("/notifications")}>
             <Bell size={20} />
             Notifications
           </a>
-          <a>
+          <a onClick={handleLogout}>
             <LogOut size={20} />
             Logout
           </a>
@@ -179,14 +185,14 @@ function AlumniDashboard() {
               <ChevronDown size={18} />
             </div>
 
-            <button className="ad-logout">
+            <button className="ad-logout" onClick={handleLogout}>
               <LogOut size={18} />
               Logout
             </button>
           </div>
         </header>
 
-        <section className="ad-hero-row">
+       {/* <section className="ad-hero-row">
           <div className="ad-welcome-card">
             <div>
               <p className="ad-small-title">Welcome back,</p>
@@ -197,9 +203,9 @@ function AlumniDashboard() {
               </p>
 
               <div className="ad-hero-actions">
-                <button>Post Job</button>
-                <button className="outline">Create Event</button>
-                <button className="outline">Answer Forum</button>
+                <button onClick={() => navigate("/alumni/jobs")}>Post Job</button>
+                <button className="outline"  onClick={() => navigate("/alumni/events")}>Create Event</button>
+                <button className="outline" onClick={() => navigate("/forum")}>Answer Forum</button>
               </div>
             </div>
 
@@ -242,9 +248,9 @@ function AlumniDashboard() {
               <ArrowRight size={17} />
             </button>
           </div>
-        </section>
+        </section>*/}
 
-        <section className="ad-analytics-grid">
+        {/*<section className="ad-analytics-grid">
           {analytics.map((item, index) => {
             const Icon = item.icon;
 
@@ -262,9 +268,9 @@ function AlumniDashboard() {
               </div>
             );
           })}
-        </section>
+        </section>*/}
 
-        <section className="ad-section-card">
+        {/*<section className="ad-section-card">
           <div className="ad-section-head">
             <h2>Posted Jobs / Internships</h2>
             <button>View all</button>
@@ -307,9 +313,9 @@ function AlumniDashboard() {
               </div>
             ))}
           </div>
-        </section>
+        </section>*/}
 
-        <section className="ad-section-card">
+        {/*<section className="ad-section-card">
           <div className="ad-section-head">
             <h2>Posted Events</h2>
             <button>View all</button>
@@ -340,7 +346,7 @@ function AlumniDashboard() {
               </div>
             ))}
           </div>
-        </section>
+        </section>*/}
       </main>
     </div>
   );

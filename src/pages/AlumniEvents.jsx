@@ -146,7 +146,7 @@ function AlumniEvents() {
             <MessageSquare size={20} />
             Forum
           </a>
-          <a>
+          <a onClick={() => navigate("/notifications")}>
             <Bell size={20} />
             Notifications
           </a>

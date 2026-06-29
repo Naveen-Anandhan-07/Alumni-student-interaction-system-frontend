@@ -10,6 +10,10 @@ import StudentEvents from "./pages/StudentEvents";
 import AlumniEvents from "./pages/AlumniEvents";
 import StudentJobs from "./pages/StudentJobs";
 import AlumniJobs from "./pages/AlumniJobs";
+import Forum from "./pages/Forum";
+import Notifications from "./pages/Notifications";
+import ForumQuestion from "./pages/ForumQuestion";
+
 
 function App() {
   return (
@@ -26,6 +30,9 @@ function App() {
         <Route path="/alumni/events" element={<AlumniEvents />}></Route>
         <Route path="/student/jobs" element={<StudentJobs />}></Route>
         <Route path="/alumni/jobs" element={<AlumniJobs />}></Route>
+        <Route path="/forum" element={<Forum />} />
+        <Route path="/notifications" element={<Notifications />} />
+        <Route path="/forum/question/:id" element={<ForumQuestion />} />
       </Routes>
     </BrowserRouter>
 
