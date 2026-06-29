@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Search,
   Filter,
@@ -9,15 +10,28 @@ import {
   Star,
   ArrowRight,
   Building2,
+  Bell,
+  BookOpen,
+  Briefcase,
+  LayoutDashboard,
+  LogOut,
+  MessageSquare,
+  User,
 } from "lucide-react";
 import api from "../services/api";
 import "../styles/StudentEvents.css";
 
 function StudentEvents() {
+  const navigate = useNavigate();
   const [allEvents, setAllEvents] = useState([]);
   const [recommendedEvents, setRecommendedEvents] = useState([]);
 
   const studentId = 1;
+
+  const handleLogout = () => {
+    localStorage.clear();
+    navigate("/login");
+  };
 
   const loadEvents = async () => {
     try {
@@ -32,6 +46,7 @@ function StudentEvents() {
   };
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadEvents();
   }, []);
 
@@ -52,103 +67,146 @@ function StudentEvents() {
   };
 
   return (
-    <div className="student-events-page">
-      <section className="events-filter-card">
-        <div className="search-box">
-          <Search size={20} />
-          <input type="text" placeholder="Search events..." />
+    <div className="student-events-layout">
+      <aside className="se-sidebar">
+        <div className="se-logo">
+          <BookOpen size={34} />
         </div>
 
-        <div className="filter-box">
-          <Filter size={18} />
-          <select>
-            <option>All Categories</option>
-            <option>Workshop</option>
-            <option>Webinar</option>
-            <option>Seminar</option>
-            <option>Hackathon</option>
-          </select>
-        </div>
+        <nav className="se-menu">
+          <a onClick={() => navigate("/student/dashboard")}>
+            <LayoutDashboard size={20} />
+            Dashboard
+          </a>
+          <a onClick={() => navigate("/student/profile")}>
+            <User size={20} />
+            Profile
+          </a>
+          <a>
+            <Users size={20} />
+            Mentorship
+          </a>
+          <a onClick={() => navigate("/student/jobs")}>
+            <Briefcase size={20} />
+            Jobs / Internships
+          </a>
+          <a className="active">
+            <CalendarDays size={20} />
+            Events
+          </a>
+          <a onClick={() => navigate("/forum")}>
+            <MessageSquare size={20} />
+            Forum
+          </a>
+          <a onClick={() => navigate("/notifications")}>
+            <Bell size={20} />
+            Notifications
+          </a>
+          <a onClick={handleLogout}>
+            <LogOut size={20} />
+            Logout
+          </a>
+        </nav>
+      </aside>
 
-        <div className="filter-box">
-          <Monitor size={18} />
-          <select>
-            <option>All Modes</option>
-            <option>Online</option>
-            <option>Offline</option>
-            <option>Hybrid</option>
-          </select>
-        </div>
-      </section>
-
-      <section className="events-section recommended-section">
-        <div className="section-heading">
-          <div>
-            <h2>Recommended Events</h2>
-            <p>Events matched with your skills and interests.</p>
+      <main className="student-events-page">
+        <section className="events-filter-card">
+          <div className="search-box">
+            <Search size={20} />
+            <input type="text" placeholder="Search events..." />
           </div>
-        </div>
 
-        <div className="events-grid">
-          {recommendedEvents.length === 0 ? (
-            <div className="event-empty">No recommended events listed.</div>
-          ) : (
-            recommendedEvents.map((event) => (
-              <EventCard
-                key={event.eventId}
-                recommended
-                eventId={event.eventId}
-                title={event.title}
-                category="Recommended"
-                mode=""
-                date=""
-                venue={event.reason}
-                seats=""
-                match={`${event.matchScore}%`}
-                status={event.status}
-                imageUrl={event.imageUrl}
-                full={event.status === "FULL"}
-                canApply={event.canApply}
-                onRegister={handleRegister}
-              />
-            ))
-          )}
-        </div>
-      </section>
-
-      <section className="events-section">
-        <div className="section-heading">
-          <div>
-            <h2>All Events</h2>
-            <p>Browse all available alumni events.</p>
+          <div className="filter-box">
+            <Filter size={18} />
+            <select>
+              <option>All Categories</option>
+              <option>Workshop</option>
+              <option>Webinar</option>
+              <option>Seminar</option>
+              <option>Hackathon</option>
+            </select>
           </div>
-        </div>
 
-        <div className="events-grid">
-          {allEvents.length === 0 ? (
-            <div className="event-empty">No events listed.</div>
-          ) : (
-            allEvents.map((event) => (
-              <EventCard
-                key={event.id}
-                eventId={event.id}
-                title={event.title}
-                category={event.eventType}
-                mode={event.mode}
-                date={event.eventDate}
-                venue={event.venueOrLink}
-                seats={`${event.availableSeats} seats left`}
-                match={null}
-                status={event.status}
-                imageUrl={event.imageUrl}
-                full={event.status === "FULL"}
-                canApply={event.canApply}
-                onRegister={handleRegister}
-              />
-            ))
-          )}
-        </div>
-      </section>
+          <div className="filter-box">
+            <Monitor size={18} />
+            <select>
+              <option>All Modes</option>
+              <option>Online</option>
+              <option>Offline</option>
+              <option>Hybrid</option>
+            </select>
+          </div>
+        </section>
+
+        <section className="events-section recommended-section">
+          <div className="section-heading">
+            <div>
+              <h2>Recommended Events</h2>
+              <p>Events matched with your skills and interests.</p>
+            </div>
+          </div>
+
+          <div className="events-grid">
+            {recommendedEvents.length === 0 ? (
+              <div className="event-empty">No recommended events listed.</div>
+            ) : (
+              recommendedEvents.map((event) => (
+                <EventCard
+                  key={event.eventId}
+                  recommended
+                  eventId={event.eventId}
+                  title={event.title}
+                  description={event.description}
+                  mode=""
+                  date=""
+                  venue={event.reason}
+                  seats=""
+                  match={`${event.matchScore}%`}
+                  status={event.status}
+                  imageUrl={event.imageUrl}
+                  full={event.status === "FULL"}
+                  canApply={event.canApply}
+                  onRegister={handleRegister}
+                />
+              ))
+            )}
+          </div>
+        </section>
+
+        <section className="events-section">
+          <div className="section-heading">
+            <div>
+              <h2>All Events</h2>
+              <p>Browse all available alumni events.</p>
+            </div>
+          </div>
+
+          <div className="events-grid">
+            {allEvents.length === 0 ? (
+              <div className="event-empty">No events listed.</div>
+            ) : (
+              allEvents.map((event) => (
+                <EventCard
+                  key={event.id}
+                  eventId={event.id}
+                  title={event.title}
+                  description={event.description}
+                  mode={event.mode}
+                  date={event.eventDate}
+                  venue={event.venueOrLink}
+                  seats={`${event.availableSeats} seats left`}
+                  match={null}
+                  status={event.status}
+                  imageUrl={event.imageUrl}
+                  full={event.status === "FULL"}
+                  canApply={event.canApply}
+                  onRegister={handleRegister}
+                />
+              ))
+            )}
+          </div>
+        </section>
+      </main>
     </div>
   );
 }
@@ -156,7 +214,7 @@ function StudentEvents() {
 function EventCard({
   eventId,
   title,
-  category,
+  description,
   mode,
   date,
   venue,
@@ -199,8 +257,8 @@ function EventCard({
         </div>
 
         <p className="event-description">
-          Join this alumni-led session and improve your career skills through
-          practical guidance and interaction.
+          {description ||
+            "Join this alumni-led session and improve your career skills through practical guidance and interaction."}
         </p>
 
         <div className="event-meta-grid">

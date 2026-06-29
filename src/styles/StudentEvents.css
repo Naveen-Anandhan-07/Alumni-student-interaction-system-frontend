@@ -11,8 +11,63 @@ body {
   color: #17132f;
 }
 
-.student-events-page {
+.student-events-layout {
   min-height: 100vh;
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  background: #f7f5fb;
+}
+
+.se-sidebar {
+  min-height: 100vh;
+  background: linear-gradient(180deg, #17053f 0%, #0d0228 100%);
+  padding: 28px 18px;
+  color: white;
+  position: sticky;
+  top: 0;
+}
+
+.se-logo {
+  width: 72px;
+  height: 72px;
+  margin: 0 auto 34px;
+  border-radius: 22px;
+  display: grid;
+  place-items: center;
+  background: rgba(255, 255, 255, 0.12);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.se-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.se-menu a {
+  height: 52px;
+  border-radius: 15px;
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.25s ease;
+}
+
+.se-menu a:hover,
+.se-menu a.active {
+  background: #4b1fb8;
+  color: white;
+  box-shadow: 0 12px 28px rgba(75, 31, 184, 0.35);
+}
+
+.student-events-page {
+  min-width: 0;
   padding: 34px;
   background:
     radial-gradient(circle at top left, rgba(75, 31, 184, 0.08), transparent 32%),
@@ -106,7 +161,7 @@ body {
 
 .event-card {
   width: 100%;
-  height: 430px;
+  height: 460px;
   background: #ffffff;
   border: 1px solid #e8e3f3;
   border-radius: 22px;
@@ -165,10 +220,11 @@ body {
 }
 
 .event-card-body {
-  height: 270px;
+  height: 300px;
   padding: 18px;
   display: flex;
   flex-direction: column;
+  min-height: 0;
 }
 
 .event-title-row {
@@ -183,6 +239,10 @@ body {
   color: #17132f;
   font-size: 18px;
   line-height: 1.3;
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 
 .event-status {
@@ -208,16 +268,24 @@ body {
   color: #74708a;
   font-size: 13px;
   line-height: 1.5;
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  flex-shrink: 0;
 }
 
 .event-meta-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 10px;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .event-meta-grid span {
   min-height: 34px;
+  max-height: 48px;
   padding: 7px 9px;
   border-radius: 11px;
   background: #faf9ff;
@@ -227,6 +295,7 @@ body {
   display: flex;
   align-items: center;
   gap: 6px;
+  overflow: hidden;
 }
 
 .event-meta-grid svg {
@@ -241,6 +310,8 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-shrink: 0;
+  gap: 12px;
 }
 
 .match-box p {
@@ -258,6 +329,7 @@ body {
 }
 
 .event-btn {
+  flex-shrink: 0;
   height: 38px;
   padding: 0 14px;
   border: none;
@@ -294,6 +366,14 @@ body {
 /* RESPONSIVE */
 
 @media (max-width: 1100px) {
+  .student-events-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .se-sidebar {
+    display: none;
+  }
+
   .events-filter-card {
     grid-template-columns: 1fr;
   }
