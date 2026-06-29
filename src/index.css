@@ -109,3 +109,17 @@ code {
   padding: 4px 8px;
   background: var(--code-bg);
 }
+
+#root {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  border: none;
+  min-height: 100vh;
+  display: block;
+  text-align: left;
+}
+
+.alumni-dashboard {
+  width: 100%;
+}

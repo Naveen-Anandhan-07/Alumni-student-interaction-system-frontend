@@ -55,8 +55,8 @@ function AlumniProfile() {
           <span>My Events</span>
           <span>Jobs</span>
           <span>Mentorship</span>
-          <span>Forum</span>
-          <span>Notifications</span>
+          <span onClick={() => navigate("/forum")}>Forum</span>
+          <span onClick={() => navigate("/notifications")}>Notifications</span>
         </nav>
 
         <button className="logout-btn" onClick={handleLogout}>

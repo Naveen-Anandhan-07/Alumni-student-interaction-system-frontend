@@ -24,9 +24,9 @@ function Login() {
     localStorage.setItem("user", JSON.stringify(res.data));
 
     if (res.data.role === "STUDENT") {
-      navigate("/student/profile");
+      navigate("/student/dashboard");
     } else {
-      navigate("/alumni/profile");
+      navigate("/alumni/dashboard");
     }
   } catch (error) {
     alert("Invalid email or password");
