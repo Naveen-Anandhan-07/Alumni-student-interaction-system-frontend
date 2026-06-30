@@ -25,6 +25,21 @@ body {
   color: white;
   position: sticky;
   top: 0;
+  align-self: start;
+  height: 100vh;
+  overflow-y: auto;
+  z-index: 20;
+}
+
+.sm-avatar,
+.sm-avatar img {
+  overflow: hidden;
+}
+
+.sm-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .sm-logo {

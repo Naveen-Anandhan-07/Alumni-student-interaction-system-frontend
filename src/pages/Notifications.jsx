@@ -14,12 +14,15 @@ import {
   Users,
 } from "lucide-react";
 import api from "../services/api";
+import LoadingState from "../components/LoadingState";
 import "../styles/Notifications.css";
+import { getProfileImageUrl } from "../utils/profileImage";
 
 function Notifications() {
   const navigate = useNavigate();
 
   const [user, setUser] = useState(null);
+  const [profile, setProfile] = useState(null);
   const [notifications, setNotifications] = useState([]);
   const [filter, setFilter] = useState("ALL");
   const [loading, setLoading] = useState(true);
@@ -35,8 +38,23 @@ function Notifications() {
     const loggedUser = JSON.parse(storedUser);
 
     setUser(loggedUser);
+    loadProfile(loggedUser);
     loadNotifications(loggedUser, "ALL");
   }, [navigate]);
+
+  const loadProfile = async (loggedUser) => {
+    try {
+      const endpoint =
+        loggedUser.role === "STUDENT"
+          ? `/students/${loggedUser.profileId}`
+          : `/alumni/${loggedUser.profileId}`;
+
+      const response = await api.get(endpoint);
+      setProfile(response.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   const loadNotifications = async (
     loggedUser,
@@ -99,56 +117,6 @@ function Notifications() {
     }
   };
 
-  const acceptMentorship = async (
-    mentorshipId,
-    notificationId
-  ) => {
-    try {
-      await api.put(
-        `/mentorships/${mentorshipId}/accept`
-      );
-
-      await api.put(
-        `/notifications/${notificationId}/read`
-      );
-
-      alert("Mentorship request accepted");
-      refreshNotifications();
-    } catch (error) {
-      console.log(error);
-
-      alert(
-        error.response?.data?.message ||
-          "Failed to accept mentorship request"
-      );
-    }
-  };
-
-  const rejectMentorship = async (
-    mentorshipId,
-    notificationId
-  ) => {
-    try {
-      await api.put(
-        `/mentorships/${mentorshipId}/reject`
-      );
-
-      await api.put(
-        `/notifications/${notificationId}/read`
-      );
-
-      alert("Mentorship request rejected");
-      refreshNotifications();
-    } catch (error) {
-      console.log(error);
-
-      alert(
-        error.response?.data?.message ||
-          "Failed to reject mentorship request"
-      );
-    }
-  };
-
   const getMentorshipDetails = (message) => {
     const details = {
       mentorshipId: "",
@@ -199,9 +167,10 @@ function Notifications() {
 
   if (loading) {
     return (
-      <div className="nt-empty">
-        Loading notifications...
-      </div>
+      <LoadingState
+        title="Loading notifications"
+        subtitle="Checking your latest updates and unread messages."
+      />
     );
   }
 
@@ -230,6 +199,9 @@ function Notifications() {
       unreadCount++;
     }
   }
+
+  const profileName = profile?.name || user?.name || "User";
+  const profileImageUrl = getProfileImageUrl(profile);
 
   return (
     <div className="notifications-layout">
@@ -298,20 +270,25 @@ function Notifications() {
           </div>
 
           <div className="nt-top-actions">
-            <button className="nt-icon-btn">
+            <button
+              className="nt-icon-btn"
+              onClick={() => navigate("/notifications")}
+            >
               <Bell size={21} />
-              <span>{unreadCount}</span>
+              {unreadCount > 0 && <span>{unreadCount}</span>}
             </button>
 
             <div className="nt-profile">
               <div className="nt-avatar">
-                {user?.name
-                  ?.charAt(0)
-                  .toUpperCase() || "U"}
+                {profileImageUrl ? (
+                  <img src={profileImageUrl} alt={profileName} />
+                ) : (
+                  profileName.charAt(0).toUpperCase()
+                )}
               </div>
 
               <div>
-                <h4>{user?.name}</h4>
+                <h4>{profileName}</h4>
                 <p>{user?.role}</p>
               </div>
             </div>
@@ -325,17 +302,6 @@ function Notifications() {
             </button>
           </div>
         </header>
-
-        <section className="nt-page-head">
-          <div>
-            <p>Notifications</p>
-            <h1>Your Updates</h1>
-            <span>
-              View mentorship requests, job updates,
-              event updates and forum activity.
-            </span>
-          </div>
-        </section>
 
         <section className="nt-filter-card">
           <button
@@ -419,44 +385,38 @@ function Notifications() {
                   <div className="nt-actions">
                     {isMentorshipRequest ? (
                       <>
-                        {mentorshipDetails.studentId && (
+                        <button
+                          onClick={() =>
+                            navigate("/alumni/mentorships")
+                          }
+                        >
+                          View
+                        </button>
+
+                        {!notification.isRead && (
                           <button
                             onClick={() =>
-                              navigate(
-                                `/alumni/student/${mentorshipDetails.studentId}`
+                              markAsRead(
+                                notification.id
                               )
                             }
                           >
-                            View Profile
+                            <CheckCircle size={16} />
+                            Mark Read
                           </button>
                         )}
 
-                        {!notification.isRead && (
-                          <>
-                            <button
-                              onClick={() =>
-                                acceptMentorship(
-                                  mentorshipDetails.mentorshipId,
-                                  notification.id
-                                )
-                              }
-                            >
-                              Accept
-                            </button>
-
-                            <button
-                              className="delete"
-                              onClick={() =>
-                                rejectMentorship(
-                                  mentorshipDetails.mentorshipId,
-                                  notification.id
-                                )
-                              }
-                            >
-                              Reject
-                            </button>
-                          </>
-                        )}
+                        <button
+                          className="delete"
+                          onClick={() =>
+                            deleteNotification(
+                              notification.id
+                            )
+                          }
+                        >
+                          <Trash2 size={16} />
+                          Delete
+                        </button>
                       </>
                     ) : (
                       <>

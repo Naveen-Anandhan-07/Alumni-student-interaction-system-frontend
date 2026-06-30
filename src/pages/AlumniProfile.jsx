@@ -9,19 +9,41 @@ import {
   LayoutDashboard,
   LogOut,
   MessageSquare,
+  Plus,
   Star,
   User,
   Users,
+  X,
 } from "lucide-react";
 import api from "../services/api";
+import LoadingState from "../components/LoadingState";
 import "../styles/Profile.css";
+import { getProfileImagePath, getProfileImageUrl } from "../utils/profileImage";
+
+const splitSkills = (skills) =>
+  skills
+    ? skills
+        .split(",")
+        .map((skill) => skill.trim())
+        .filter(Boolean)
+    : [];
 
 function AlumniProfile() {
   const navigate = useNavigate();
 
   const [alumni, setAlumni] = useState(null);
-  const [dashboard, setDashboard] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [previewImage, setPreviewImage] = useState(null);
+  const [skillInput, setSkillInput] = useState("");
+  const [form, setForm] = useState({
+    name: "",
+    company: "",
+    designation: "",
+    experience: "",
+    role: "Alumni",
+    skills: [],
+  });
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
@@ -43,16 +65,18 @@ function AlumniProfile() {
 
   const loadProfile = async (alumniId) => {
     try {
-      const profileResponse = await api.get(
-        `/alumni/${alumniId}`
-      );
+      const profileResponse = await api.get(`/alumni/${alumniId}`);
+      const profile = profileResponse.data;
 
-      const dashboardResponse = await api.get(
-        `/dashboard/alumni/${alumniId}`
-      );
-
-      setAlumni(profileResponse.data);
-      setDashboard(dashboardResponse.data);
+      setAlumni(profile);
+      setForm({
+        name: profile.name || "",
+        company: profile.company || "",
+        designation: profile.designation || "",
+        experience: profile.experience || "",
+        role: profile.role || "Alumni",
+        skills: splitSkills(profile.skills),
+      });
     } catch (error) {
       console.log(error);
       alert("Failed to load alumni profile");
@@ -66,206 +90,348 @@ function AlumniProfile() {
     navigate("/login");
   };
 
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const addSkill = () => {
+    const skill = skillInput.trim();
+
+    if (!skill || form.skills.includes(skill)) {
+      setSkillInput("");
+      return;
+    }
+
+    setForm({ ...form, skills: [...form.skills, skill] });
+    setSkillInput("");
+  };
+
+  const removeSkill = (skillToRemove) => {
+    setForm({
+      ...form,
+      skills: form.skills.filter((skill) => skill !== skillToRemove),
+    });
+  };
+
+  const saveProfile = async (e) => {
+    e.preventDefault();
+
+    try {
+      const payload = {
+        ...alumni,
+        name: form.name,
+        company: form.company,
+        designation: form.designation,
+        experience: form.experience,
+        role: form.role,
+        skills: form.skills.join(", "),
+      };
+
+      const response = await api.put(`/alumni/${alumni.id}`, payload);
+      const updatedAlumni = response.data;
+
+      setAlumni(updatedAlumni);
+      setForm({
+        name: updatedAlumni.name || "",
+        company: updatedAlumni.company || "",
+        designation: updatedAlumni.designation || "",
+        experience: updatedAlumni.experience || "",
+        role: updatedAlumni.role || "Alumni",
+        skills: splitSkills(updatedAlumni.skills),
+      });
+
+      const storedUser = JSON.parse(localStorage.getItem("user"));
+      localStorage.setItem(
+        "user",
+        JSON.stringify({ ...storedUser, name: updatedAlumni.name })
+      );
+
+      alert("Profile updated");
+    } catch (error) {
+      console.log(error);
+      alert(error.response?.data?.message || "Failed to update profile");
+    }
+  };
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+
+    if (!file) {
+      return;
+    }
+
+    setSelectedImage(file);
+    setPreviewImage(URL.createObjectURL(file));
+  };
+
+  const uploadProfileImage = async () => {
+    if (!selectedImage) {
+      alert("Please select an image first");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("image", selectedImage);
+
+    try {
+      const res = await api.post(`/alumni/${alumni.id}/profile-image`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      setAlumni(res.data);
+      setSelectedImage(null);
+      setPreviewImage(null);
+      alert("Profile picture updated");
+    } catch (error) {
+      console.log(error);
+      alert("Image upload failed");
+    }
+  };
+
+  const removeProfileImage = async () => {
+    try {
+      const res = await api.delete(`/alumni/${alumni.id}/profile-image`);
+
+      setAlumni(res.data);
+      setSelectedImage(null);
+      setPreviewImage(null);
+      alert("Profile picture removed");
+    } catch (error) {
+      console.log(error);
+      alert("Image remove failed");
+    }
+  };
+
   if (loading) {
     return (
-      <div className="profile-loading">
-        Loading profile...
-      </div>
+      <LoadingState
+        title="Loading profile"
+        subtitle="Getting your alumni profile ready."
+      />
     );
   }
 
   if (!alumni) {
-    return (
-      <div className="profile-loading">
-        Alumni profile is not available.
-      </div>
-    );
+    return <div className="profile-loading">Alumni profile is not available.</div>;
   }
 
-  const skills = alumni.skills
-    ? alumni.skills.split(",")
-    : [];
-
-  const firstLetter = alumni.name
-    ? alumni.name.charAt(0).toUpperCase()
-    : "A";
+  const firstLetter = alumni.name ? alumni.name.charAt(0).toUpperCase() : "A";
+  const profileImageUrl = previewImage || getProfileImageUrl(alumni);
+  const hasProfileImage = Boolean(getProfileImagePath(alumni));
 
   return (
     <div className="profile-page">
-      <aside className="profile-sidebar">
-        <div className="logo">
-          <BookOpen size={28} />
-          Alumni Portal
+      <aside className="pf-sidebar">
+        <div className="pf-logo">
+          <BookOpen size={34} />
         </div>
 
-        <nav>
-          <span
-            onClick={() => navigate("/alumni/dashboard")}
-          >
-            <LayoutDashboard size={18} />
+        <nav className="pf-menu">
+          <a onClick={() => navigate("/alumni/dashboard")}>
+            <LayoutDashboard size={20} />
             Dashboard
-          </span>
+          </a>
 
-          <span className="active">
-            <User size={18} />
+          <a className="active">
+            <User size={20} />
             Profile
-          </span>
+          </a>
 
-          <span
-            onClick={() => navigate("/alumni/mentorships")}
-          >
-            <Users size={18} />
+          <a onClick={() => navigate("/alumni/mentorships")}>
+            <Users size={20} />
             Mentorship
-          </span>
+          </a>
 
-          <span
-            onClick={() => navigate("/alumni/jobs")}
-          >
-            <Briefcase size={18} />
-            Jobs
-          </span>
+          <a onClick={() => navigate("/alumni/jobs")}>
+            <Briefcase size={20} />
+            Jobs / Internships
+          </a>
 
-          <span
-            onClick={() => navigate("/alumni/events")}
-          >
-            <CalendarDays size={18} />
+          <a onClick={() => navigate("/alumni/events")}>
+            <CalendarDays size={20} />
             Events
-          </span>
+          </a>
 
-          <span onClick={() => navigate("/forum")}>
-            <MessageSquare size={18} />
+          <a onClick={() => navigate("/forum")}>
+            <MessageSquare size={20} />
             Forum
-          </span>
+          </a>
 
-          <span
-            onClick={() => navigate("/notifications")}
-          >
-            <Bell size={18} />
+          <a onClick={() => navigate("/notifications")}>
+            <Bell size={20} />
             Notifications
-          </span>
-        </nav>
+          </a>
 
-        <button
-          className="logout-btn"
-          onClick={handleLogout}
-        >
-          <LogOut size={18} />
-          Log Out
-        </button>
+          <a onClick={handleLogout}>
+            <LogOut size={20} />
+            Logout
+          </a>
+        </nav>
       </aside>
 
-      <main className="profile-main">
-        <section className="profile-grid">
-          <div className="glass-card intro-card">
-            <p className="small-title">
-              Alumni Profile
-            </p>
-
+      <main className="pf-main">
+        <section className="pf-page-head compact">
+          <div>
+            <p>Profile Settings</p>
             <h1>{alumni.name}</h1>
-
-            <p>
-              Alumni mentor helping students with career
-              guidance, technical growth, events and job
-              opportunities.
-            </p>
+            <span>
+              Manage your public alumni profile, professional details, profile
+              photo and skills.
+            </span>
           </div>
 
-          <div className="glass-card user-card">
-            <div className="avatar">
-              {firstLetter}
+          <div className="pf-head-avatar image-avatar">
+            {profileImageUrl ? (
+              <img src={profileImageUrl} alt={alumni.name} />
+            ) : (
+              firstLetter
+            )}
+          </div>
+        </section>
+
+        <section className="pf-editor-grid">
+          <div className="pf-profile-card pf-photo-card">
+            <div className="pf-avatar-large image-avatar">
+              {profileImageUrl ? (
+                <img src={profileImageUrl} alt="Profile" />
+              ) : (
+                firstLetter
+              )}
             </div>
 
             <h2>{alumni.name}</h2>
             <p>{alumni.email}</p>
 
-            <div className="line"></div>
+            <div className="pf-upload-box">
+              <input type="file" accept="image/*" onChange={handleImageChange} />
 
-            <p>
-              <Building size={17} />
-              {alumni.company || "Company not provided"}
-            </p>
-
-            <p>
-              <Briefcase size={17} />
-              {alumni.designation ||
-                "Designation not provided"}
-            </p>
-
-            <p>
-              <Star size={17} />
-              {alumni.experience || 0} years experience
-            </p>
-          </div>
-
-          <div className="glass-card stat-box">
-            <h3>Events</h3>
-            <h2>
-              {dashboard?.postedEventsCount || 0}
-            </h2>
-            <p>Posted events</p>
-          </div>
-
-          <div className="glass-card stat-box">
-            <h3>Registrations</h3>
-            <h2>
-              {dashboard
-                ?.totalRegisteredStudentsForEvents || 0}
-            </h2>
-            <p>Student registrations</p>
-          </div>
-
-          <div className="glass-card stat-box">
-            <h3>Answers</h3>
-            <h2>
-              {dashboard?.answeredQuestionsCount || 0}
-            </h2>
-            <p>Forum answers</p>
-          </div>
-
-          <div className="glass-card stat-box">
-            <h3>Jobs</h3>
-            <h2>
-              {dashboard?.postedJobsCount || 0}
-            </h2>
-            <p>Posted jobs</p>
-          </div>
-
-          <div className="glass-card wide-card">
-            <h3>Skills</h3>
-
-            <div className="skill-list">
-              {skills.length === 0 ? (
-                <span>No skills added</span>
+              {selectedImage ? (
+                <button onClick={uploadProfileImage}>Save Photo</button>
+              ) : hasProfileImage ? (
+                <button className="danger" onClick={removeProfileImage}>
+                  Remove Photo
+                </button>
               ) : (
-                skills.map((skill, index) => (
-                  <span key={index}>
-                    {skill.trim()}
-                  </span>
-                ))
+                <button onClick={uploadProfileImage}>Upload Photo</button>
               )}
             </div>
+
+            <div className="pf-info-list">
+              <div>
+                <span>Company</span>
+                <strong>{alumni.company || "Not provided"}</strong>
+              </div>
+              <div>
+                <span>Role</span>
+                <strong>{alumni.designation || alumni.role || "Alumni"}</strong>
+              </div>
+            </div>
           </div>
 
-          <div className="glass-card wide-card">
-            <h3>Mentorship</h3>
-
-            <div className="list-item">
-              <span>Requests Received</span>
-
-              <b>
-                {dashboard
-                  ?.mentorshipRequestsReceivedCount || 0}
-              </b>
+          <form className="pf-section-card pf-edit-card" onSubmit={saveProfile}>
+            <div className="pf-section-head">
+              <h2>Profile Details</h2>
+              <p>Edit the information shown to students.</p>
             </div>
 
-            <button
-              className="logout-btn"
-              onClick={() =>
-                navigate("/alumni/mentorships")
-              }
-            >
-              View Mentorships
-            </button>
+            <div className="pf-form-grid">
+              <label>
+                Name
+                <input name="name" value={form.name} onChange={handleChange} required />
+              </label>
+
+              <label>
+                Company
+                <input
+                  name="company"
+                  value={form.company}
+                  onChange={handleChange}
+                  placeholder="Example: Zoho"
+                />
+              </label>
+
+              <label>
+                Role / Designation
+                <input
+                  name="designation"
+                  value={form.designation}
+                  onChange={handleChange}
+                  placeholder="Example: Software Engineer"
+                />
+              </label>
+
+              <label>
+                Experience
+                <input
+                  name="experience"
+                  value={form.experience}
+                  onChange={handleChange}
+                  placeholder="Example: 5"
+                />
+              </label>
+            </div>
+
+            <div className="pf-skills-editor">
+              <label>
+                Skills
+                <div className="pf-skill-input">
+                  <input
+                    value={skillInput}
+                    onChange={(e) => setSkillInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        addSkill();
+                      }
+                    }}
+                    placeholder="Add a skill"
+                  />
+                  <button type="button" onClick={addSkill}>
+                    <Plus size={16} />
+                    Add
+                  </button>
+                </div>
+              </label>
+
+              <div className="pf-skills">
+                {form.skills.length === 0 ? (
+                  <span>No skills added</span>
+                ) : (
+                  form.skills.map((skill) => (
+                    <span key={skill}>
+                      {skill}
+                      <button type="button" onClick={() => removeSkill(skill)}>
+                        <X size={13} />
+                      </button>
+                    </span>
+                  ))
+                )}
+              </div>
+            </div>
+
+            <div className="pf-form-actions">
+              <button type="submit">Save Profile</button>
+            </div>
+          </form>
+
+          <div className="pf-section-card pf-summary-card">
+            <div>
+              <Building size={18} />
+              <span>Company</span>
+              <strong>{alumni.company || "Not provided"}</strong>
+            </div>
+            <div>
+              <Briefcase size={18} />
+              <span>Role</span>
+              <strong>{alumni.designation || "Not provided"}</strong>
+            </div>
+            <div>
+              <Star size={18} />
+              <span>Experience</span>
+              <strong>{alumni.experience || 0} years</strong>
+            </div>
           </div>
         </section>
       </main>

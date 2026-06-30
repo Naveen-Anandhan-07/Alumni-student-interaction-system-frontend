@@ -1,18 +1,28 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
+  ArrowRight,
   Bell,
   BookOpen,
   Briefcase,
+  Building2,
   CalendarDays,
   LayoutDashboard,
   LogOut,
+  MapPin,
   MessageSquare,
+  Monitor,
+  Star,
   User,
   Users,
 } from "lucide-react";
 import api from "../services/api";
+import LoadingState from "../components/LoadingState";
 import "../styles/StudentDashboard.css";
+import "../styles/StudentJobs.css";
+import "../styles/StudentEvents.css";
+import { getProfileImageUrl } from "../utils/profileImage";
+import useUnreadNotifications from "../hooks/useUnreadNotifications";
 
 function StudentDashboard() {
   const navigate = useNavigate();
@@ -20,8 +30,11 @@ function StudentDashboard() {
   const [student, setStudent] = useState(null);
   const [dashboard, setDashboard] = useState(null);
   const [applications, setApplications] = useState([]);
+  const [recommendedJobs, setRecommendedJobs] = useState([]);
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(null);
+  const unreadCount = useUnreadNotifications(user);
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
@@ -38,6 +51,7 @@ function StudentDashboard() {
       return;
     }
 
+    setUser(user);
     loadDashboard(user.profileId);
   }, [navigate]);
 
@@ -59,9 +73,22 @@ function StudentDashboard() {
         `/events/recommended/${studentId}`
       );
 
+      let recommendedJobData = [];
+
+      try {
+        const recommendedJobResponse = await api.get(
+          `/jobs/recommended/${studentId}`
+        );
+
+        recommendedJobData = recommendedJobResponse.data || [];
+      } catch (recommendedJobError) {
+        console.log(recommendedJobError);
+      }
+
       setStudent(studentResponse.data);
       setDashboard(dashboardResponse.data);
       setApplications(applicationResponse.data);
+      setRecommendedJobs(recommendedJobData);
       setEvents(eventResponse.data);
     } catch (error) {
       console.log(error);
@@ -92,6 +119,20 @@ function StudentDashboard() {
     }
   };
 
+  const applyJob = async (jobId) => {
+    try {
+      const user = JSON.parse(localStorage.getItem("user"));
+
+      await api.post(`/jobs/${jobId}/apply/${user.profileId}`);
+
+      alert("Applied successfully");
+      loadDashboard(user.profileId);
+    } catch (error) {
+      console.log(error);
+      alert(error.response?.data?.message || "Application failed");
+    }
+  };
+
   const registerEvent = async (eventId) => {
     try {
       const user = JSON.parse(localStorage.getItem("user"));
@@ -114,9 +155,10 @@ function StudentDashboard() {
 
   if (loading) {
     return (
-      <div className="student-dashboard">
-        Loading dashboard...
-      </div>
+      <LoadingState
+        title="Loading dashboard"
+        subtitle="Collecting your profile, applications and recommendations."
+      />
     );
   }
 
@@ -131,6 +173,7 @@ function StudentDashboard() {
   const firstLetter = student.name
     ? student.name.charAt(0).toUpperCase()
     : "S";
+  const profileImageUrl = getProfileImageUrl(student);
 
   let mentorStatus = "NONE";
 
@@ -200,11 +243,16 @@ function StudentDashboard() {
               onClick={() => navigate("/notifications")}
             >
               <Bell size={21} />
+              {unreadCount > 0 && <span>{unreadCount}</span>}
             </button>
 
             <div className="sd-profile">
               <div className="sd-avatar">
-                {firstLetter}
+                {profileImageUrl ? (
+                  <img src={profileImageUrl} alt={student.name} />
+                ) : (
+                  firstLetter
+                )}
               </div>
 
               <div>
@@ -370,9 +418,26 @@ function StudentDashboard() {
                 className="sd-table-row"
                 key={application.applicationId}
               >
-                <span>{application.company}</span>
-                <span>{application.jobTitle}</span>
-                <span>{application.status}</span>
+                <div className="company-cell">
+                  <div className="company-logo">
+                    {application.company
+                      ?.charAt(0)
+                      .toUpperCase() || "J"}
+                  </div>
+
+                  <div>
+                    <strong>{application.company}</strong>
+                    <p>{application.jobTitle}</p>
+                  </div>
+                </div>
+
+                <span
+                  className={`status-pill ${application.status
+                    ?.toLowerCase()
+                    .replace("_", "-")}`}
+                >
+                  {application.status}
+                </span>
 
                 {application.status !== "CANCELLED" && (
                   <button
@@ -393,6 +458,32 @@ function StudentDashboard() {
 
         <section className="sd-section-card">
           <div className="sd-section-head">
+            <h2>Recommended Jobs</h2>
+
+            <button
+              onClick={() => navigate("/student/jobs")}
+            >
+              View All
+            </button>
+          </div>
+
+          {recommendedJobs.length === 0 ? (
+            <p>No recommended jobs found.</p>
+          ) : (
+            <div className="sj-jobs-grid sd-recommended-jobs-grid">
+              {recommendedJobs.slice(0, 3).map((job) => (
+                <DashboardJobCard
+                  key={job.id || job.jobId}
+                  job={job}
+                  onApply={applyJob}
+                />
+              ))}
+            </div>
+          )}
+        </section>
+
+        <section className="sd-section-card">
+          <div className="sd-section-head">
             <h2>Recommended Events</h2>
 
             <button
@@ -405,49 +496,155 @@ function StudentDashboard() {
           {events.length === 0 ? (
             <p>No recommended events found.</p>
           ) : (
-            <div className="sd-events-grid">
+            <div className="events-grid sd-recommended-events-grid">
               {events.slice(0, 3).map((event) => (
-                <div
-                  className="sd-event-card"
+                <DashboardEventCard
                   key={event.eventId}
-                >
-                  <div className="event-info">
-                    <h3>{event.title}</h3>
-
-                    <p>
-                      Required skills:{" "}
-                      {event.requiredSkills}
-                    </p>
-
-                    <p>{event.reason}</p>
-
-                    <p>
-                      Skill match: {event.matchScore}%
-                    </p>
-                  </div>
-
-                  <div className="event-action">
-                    {event.canApply ? (
-                      <button
-                        className="register-btn"
-                        onClick={() =>
-                          registerEvent(event.eventId)
-                        }
-                      >
-                        Register
-                      </button>
-                    ) : (
-                      <button disabled>
-                        {event.status}
-                      </button>
-                    )}
-                  </div>
-                </div>
+                  event={event}
+                  onRegister={registerEvent}
+                />
               ))}
             </div>
           )}
         </section>
       </main>
+    </div>
+  );
+}
+
+function DashboardJobCard({ job, onApply }) {
+  const jobId = job.id || job.jobId;
+
+  return (
+    <div className="sj-job-card">
+      <div className="sj-job-icon">
+        <Building2 size={42} />
+      </div>
+
+      <div className="sj-job-body">
+        <h3>{job.title || job.jobTitle}</h3>
+        <p className="sj-company">{job.company}</p>
+
+        <p className="sj-desc">
+          {job.description || job.reason || "No description provided."}
+        </p>
+
+        <div className="sj-job-meta">
+          <span>
+            <MapPin size={15} />
+            {job.location || "Location not provided"}
+          </span>
+
+          <span>
+            <Briefcase size={15} />
+            {job.jobType || "Job"}
+          </span>
+        </div>
+
+        <div className="sj-skills">
+          {job.skillsRequired || job.requiredSkills || "Skills not provided"}
+        </div>
+
+        {job.canApply === false ? (
+          <button disabled>{job.status || "Applied"}</button>
+        ) : (
+          <button onClick={() => onApply(jobId)}>Apply Now</button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function DashboardEventCard({ event, onRegister }) {
+  const full = event.status === "FULL";
+  const canRegister = event.canApply !== false && !full;
+
+  return (
+    <div className={`event-card ${full ? "full" : ""}`}>
+      <div className="event-image-box">
+        {event.imageUrl ? (
+          <img
+            src={`http://localhost:8080${event.imageUrl}`}
+            alt={event.title}
+            className="event-img"
+          />
+        ) : (
+          <CalendarDays size={44} />
+        )}
+
+        <span className="recommended-badge">
+          <Star size={13} />
+          Recommended
+        </span>
+      </div>
+
+      <div className="event-card-body">
+        <div className="event-title-row">
+          <h3>{event.title}</h3>
+          <span className={`event-status ${full ? "full" : "open"}`}>
+            {event.status}
+          </span>
+        </div>
+
+        <p className="event-description">
+          {event.description ||
+            event.reason ||
+            "Join this alumni-led session and improve your career skills."}
+        </p>
+
+        <div className="event-meta-grid">
+          {event.eventDate && (
+            <span>
+              <CalendarDays size={15} />
+              {event.eventDate}
+            </span>
+          )}
+
+          {event.mode && (
+            <span>
+              {event.mode === "Online" ? (
+                <Monitor size={15} />
+              ) : (
+                <Building2 size={15} />
+              )}
+              {event.mode}
+            </span>
+          )}
+
+          <span>
+            <MapPin size={15} />
+            {event.venueOrLink || event.reason || "Recommended for you"}
+          </span>
+
+          {event.requiredSkills && (
+            <span>
+              <Users size={15} />
+              {event.requiredSkills}
+            </span>
+          )}
+        </div>
+
+        <div className="event-footer">
+          <div className="match-box">
+            <p>Skill Match</p>
+            <strong>{event.matchScore}%</strong>
+          </div>
+
+          {canRegister ? (
+            <button
+              className="event-btn"
+              onClick={() => onRegister(event.eventId)}
+            >
+              Register
+              <ArrowRight size={17} />
+            </button>
+          ) : (
+            <button className="event-btn disabled" disabled>
+              {event.status || "Unavailable"}
+            </button>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

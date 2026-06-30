@@ -5,6 +5,7 @@ import {
   BookOpen,
   Briefcase,
   CalendarDays,
+  ChevronDown,
   LayoutDashboard,
   LogOut,
   MessageSquare,
@@ -12,14 +13,19 @@ import {
   Users,
 } from "lucide-react";
 import api from "../services/api";
+import LoadingState from "../components/LoadingState";
 import "../styles/AlumniMentorship.css";
+import { getProfileImageUrl } from "../utils/profileImage";
+import useUnreadNotifications from "../hooks/useUnreadNotifications";
 
 function AlumniMentorship() {
   const navigate = useNavigate();
 
   const [user, setUser] = useState(null);
+  const [alumni, setAlumni] = useState(null);
   const [mentorships, setMentorships] = useState([]);
   const [loading, setLoading] = useState(true);
+  const unreadCount = useUnreadNotifications(user);
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
@@ -42,6 +48,9 @@ function AlumniMentorship() {
 
   const loadMentorships = async (alumniId) => {
     try {
+      const alumniResponse = await api.get(`/alumni/${alumniId}`);
+      setAlumni(alumniResponse.data);
+
       const response = await api.get(
         `/mentorships/alumni/${alumniId}`
       );
@@ -104,11 +113,16 @@ function AlumniMentorship() {
 
   if (loading) {
     return (
-      <div className="am-loading">
-        Loading mentorships...
-      </div>
+      <LoadingState
+        title="Loading mentorships"
+        subtitle="Gathering pending requests and accepted mentees."
+      />
     );
   }
+
+  const alumniName = alumni?.name || user?.name || "Alumni";
+  const alumniInitials = alumniName.substring(0, 2).toUpperCase();
+  const profileImageUrl = getProfileImageUrl(alumni);
 
   return (
     <div className="am-layout">
@@ -177,7 +191,43 @@ function AlumniMentorship() {
       </aside>
 
       <main className="am-main">
-        <header className="am-header">
+        <header className="am-topbar">
+          <h2>Mentorship</h2>
+
+          <div className="am-top-actions">
+            <button
+              className="am-icon-btn"
+              onClick={() => navigate("/notifications")}
+            >
+              <Bell size={21} />
+              {unreadCount > 0 && <span>{unreadCount}</span>}
+            </button>
+
+            <div className="am-profile">
+              <div className="am-profile-avatar">
+                {profileImageUrl ? (
+                  <img src={profileImageUrl} alt={alumniName} />
+                ) : (
+                  alumniInitials
+                )}
+              </div>
+
+              <div>
+                <h4>{alumniName}</h4>
+                <p>Alumni</p>
+              </div>
+
+              <ChevronDown size={18} />
+            </div>
+
+            <button className="am-logout" onClick={handleLogout}>
+              <LogOut size={18} />
+              Logout
+            </button>
+          </div>
+        </header>
+
+        <section className="am-header">
           <div>
             <p>Alumni Mentorship</p>
             <h1>Mentorship Management</h1>
@@ -186,12 +236,7 @@ function AlumniMentorship() {
               accepted mentees.
             </span>
           </div>
-
-          <button onClick={handleLogout}>
-            <LogOut size={18} />
-            Logout
-          </button>
-        </header>
+        </section>
 
         <section className="am-summary">
           <div className="am-summary-card">

@@ -32,7 +32,7 @@ function Home() {
 
           <div className="hero-buttons">
             <button className="btn primary large" onClick={handlesignUp}>Get Started →</button>
-            <button className="btn ghost large">Explore Features</button>
+            {/*<button className="btn ghost large">Explore Features</button>*/}
           </div>
 
           <div className="mini-info">

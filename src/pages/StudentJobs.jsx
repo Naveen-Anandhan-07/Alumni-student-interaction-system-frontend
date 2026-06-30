@@ -16,17 +16,34 @@ import {
   XCircle,
 } from "lucide-react";
 import api from "../services/api";
+import LoadingState from "../components/LoadingState";
 import "../styles/StudentJobs.css";
 import { useNavigate } from "react-router-dom";
+import { getProfileImageUrl } from "../utils/profileImage";
+import useUnreadNotifications from "../hooks/useUnreadNotifications";
 
 function StudentJobs() {
-  const studentId = 1;
   const navigate = useNavigate();
+  const [student, setStudent] = useState(null);
   const [jobs, setJobs] = useState([]);
   const [applications, setApplications] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [user, setUser] = useState(null);
+  const unreadCount = useUnreadNotifications(user);
 
-  const loadJobs = async () => {
+  const handleLogout = () => {
+    localStorage.clear();
+    navigate("/login");
+  };
+
+  const loadJobs = async (studentId) => {
     try {
+      setErrorMessage("");
+
+      const studentRes = await api.get(`/students/${studentId}`);
+      setStudent(studentRes.data);
+
       const jobsRes = await api.get("/jobs");
       setJobs(jobsRes.data);
 
@@ -34,34 +51,93 @@ function StudentJobs() {
       setApplications(appRes.data);
     } catch (error) {
       console.log(error);
+      setErrorMessage("Failed to load jobs. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
-    loadJobs();
-  }, []);
+    const storedUser = localStorage.getItem("user");
+
+    if (!storedUser) {
+      navigate("/login");
+      return;
+    }
+
+    const user = JSON.parse(storedUser);
+
+    if (user.role !== "STUDENT") {
+      navigate("/login");
+      return;
+    }
+
+    setUser(user);
+    loadJobs(user.profileId);
+  }, [navigate]);
 
   const applyJob = async (jobId) => {
     try {
-      await api.post(`/jobs/${jobId}/apply/${studentId}`);
+      const user = JSON.parse(localStorage.getItem("user"));
+
+      await api.post(`/jobs/${jobId}/apply/${user.profileId}`);
       alert("Applied successfully");
-      loadJobs();
+      loadJobs(user.profileId);
     } catch (error) {
-      alert("Application failed");
       console.log(error);
+      alert(error.response?.data?.message || "Application failed");
     }
   };
 
   const cancelApplication = async (applicationId) => {
     try {
+      const user = JSON.parse(localStorage.getItem("user"));
+
       await api.put(`/jobs/applications/${applicationId}/cancel`);
       alert("Application cancelled");
-      loadJobs();
+      loadJobs(user.profileId);
     } catch (error) {
-      alert("Cancel failed");
       console.log(error);
+      alert(error.response?.data?.message || "Cancel failed");
     }
   };
+
+  if (loading) {
+    return (
+      <LoadingState
+        title="Loading jobs"
+        subtitle="Preparing opportunities and your applications."
+      />
+    );
+  }
+
+  const firstLetter = student?.name
+    ? student.name.charAt(0).toUpperCase()
+    : "S";
+  const profileImageUrl = getProfileImageUrl(student);
+
+  const appliedJobKeys = new Set(
+    applications.map((app) => {
+      const applicationJobId = app.jobId || app.job?.id;
+
+      if (applicationJobId) {
+        return `id:${applicationJobId}`;
+      }
+
+      return `title-company:${app.jobTitle}-${app.company}`;
+    })
+  );
+
+  const availableJobs = jobs.filter((job) => {
+    const jobId = job.id || job.jobId;
+    const idKey = `id:${jobId}`;
+    const titleCompanyKey = `title-company:${job.title}-${job.company}`;
+
+    return (
+      !appliedJobKeys.has(idKey) &&
+      !appliedJobKeys.has(titleCompanyKey)
+    );
+  });
 
   return (
     <div className="student-jobs-layout">
@@ -91,7 +167,7 @@ function StudentJobs() {
             <CalendarDays size={20} />
             Events
           </a>
-          <a  onClick={() => navigate("/forum")}>
+          <a onClick={() => navigate("/forum")}>
             <MessageSquare size={20} />
             Forum
           </a>
@@ -99,7 +175,7 @@ function StudentJobs() {
             <Bell size={20} />
             Notifications
           </a>
-          <a onClick={() => { localStorage.clear(); navigate("/login");}}>
+          <a onClick={handleLogout}>
             <LogOut size={20} />
             Logout
           </a>
@@ -114,21 +190,30 @@ function StudentJobs() {
           </div>
 
           <div className="sj-top-actions">
-            <button className="sj-icon-btn">
+            <button
+              className="sj-icon-btn"
+              onClick={() => navigate("/notifications")}
+            >
               <Bell size={21} />
-              <span>3</span>
+              {unreadCount > 0 && <span>{unreadCount}</span>}
             </button>
 
             <div className="sj-profile">
-              <div className="sj-avatar">VK</div>
+              <div className="sj-avatar">
+                {profileImageUrl ? (
+                  <img src={profileImageUrl} alt={student?.name || "Student"} />
+                ) : (
+                  firstLetter
+                )}
+              </div>
               <div>
-                <h4>Vijay Kumar</h4>
+                <h4>{student?.name || "Student"}</h4>
                 <p>Student</p>
               </div>
               <ChevronDown size={18} />
             </div>
 
-            <button className="sj-logout">
+            <button className="sj-logout" onClick={handleLogout}>
               <LogOut size={18} />
               Logout
             </button>
@@ -162,6 +247,8 @@ function StudentJobs() {
           </div>
         </section>
 
+        {errorMessage && <div className="sj-empty">{errorMessage}</div>}
+
         <section className="sj-section">
           <div className="sj-section-head">
             <div>
@@ -179,11 +266,11 @@ function StudentJobs() {
                   <div>
                     <h3>{app.jobTitle}</h3>
                     <p>
-                      {app.company} • {app.location} • {app.jobType}
+                      {app.company} - {app.location} - {app.jobType}
                     </p>
                   </div>
 
-                  <span className={`sj-status ${app.status.toLowerCase()}`}>
+                  <span className={`sj-status ${app.status?.toLowerCase()}`}>
                     {app.status}
                   </span>
 
@@ -196,7 +283,7 @@ function StudentJobs() {
                       Cancel
                     </button>
                   ) : (
-                    <span className="sj-muted">—</span>
+                    <span className="sj-muted">-</span>
                   )}
                 </div>
               ))
@@ -213,10 +300,10 @@ function StudentJobs() {
           </div>
 
           <div className="sj-jobs-grid">
-            {jobs.length === 0 ? (
-              <div className="sj-empty">No jobs listed.</div>
+            {availableJobs.length === 0 ? (
+              <div className="sj-empty">No unapplied jobs listed.</div>
             ) : (
-              jobs.map((job) => (
+              availableJobs.map((job) => (
                 <JobCard key={job.id} job={job} onApply={applyJob} />
               ))
             )}
