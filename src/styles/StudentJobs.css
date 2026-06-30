@@ -25,6 +25,21 @@ body {
   color: white;
   position: sticky;
   top: 0;
+  align-self: start;
+  height: 100vh;
+  overflow-y: auto;
+  z-index: 20;
+}
+
+.sj-avatar,
+.sj-avatar img {
+  overflow: hidden;
+}
+
+.sj-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .sj-logo {

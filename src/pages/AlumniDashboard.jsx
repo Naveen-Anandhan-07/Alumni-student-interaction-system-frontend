@@ -1,161 +1,252 @@
-import React from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Bell,
+  BookOpen,
   Briefcase,
   CalendarDays,
   LayoutDashboard,
   LogOut,
   MessageSquare,
-  Search,
   User,
   Users,
-  ChevronDown,
-  BookOpen,
-  Eye,
-  Edit,
-  Trash2,
-  ArrowRight,
 } from "lucide-react";
+import api from "../services/api";
+import LoadingState from "../components/LoadingState";
 import "../styles/AlumniDashboard.css";
+import { getProfileImageUrl } from "../utils/profileImage";
+import useUnreadNotifications from "../hooks/useUnreadNotifications";
+
+const normalizeObject = (value) =>
+  value && typeof value === "object" && !Array.isArray(value) ? value : {};
+
+const getAlumniId = (user) =>
+  user?.profileId || user?.alumniId || user?.id || user?.userId || "";
+
+const readAlumniSession = () => {
+  const storedUser = localStorage.getItem("user");
+
+  if (!storedUser) {
+    return null;
+  }
+
+  try {
+    const parsedUser = normalizeObject(JSON.parse(storedUser));
+    const role = String(parsedUser.role || "").toUpperCase();
+
+    if (role !== "ALUMNI") {
+      return null;
+    }
+
+    return {
+      ...parsedUser,
+      role,
+      profileId: getAlumniId(parsedUser),
+    };
+  } catch (error) {
+    console.log(error);
+    localStorage.removeItem("user");
+    return null;
+  }
+};
+
+const toDisplayText = (value, fallback = "Not provided") => {
+  if (value === null || value === undefined || value === "") {
+    return fallback;
+  }
+
+  if (Array.isArray(value)) {
+    return value.length ? value.join(", ") : fallback;
+  }
+
+  if (typeof value === "object") {
+    return Object.values(value).filter(Boolean).join(", ") || fallback;
+  }
+
+  return String(value);
+};
+
+const getFirstLetter = (value, fallback = "A") =>
+  toDisplayText(value, fallback).charAt(0).toUpperCase();
 
 function AlumniDashboard() {
   const navigate = useNavigate();
+
+  const [user] = useState(readAlumniSession);
+  const [alumni, setAlumni] = useState(null);
+  const [dashboard, setDashboard] = useState(null);
+  const [mentees, setMentees] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const unreadCount = useUnreadNotifications(user);
+
+  useEffect(() => {
+    if (!user) {
+      setLoading(false);
+      return;
+    }
+
+    if (!user.profileId) {
+      setAlumni(user);
+      setDashboard({});
+      setLoading(false);
+      return;
+    }
+
+    const loadDashboard = async () => {
+      try {
+        const [dashboardResult, alumniResult, mentorshipResult] =
+          await Promise.allSettled([
+            api.get(`/dashboard/alumni/${user.profileId}`),
+            api.get(`/alumni/${user.profileId}`),
+            api.get(`/mentorships/alumni/${user.profileId}`),
+          ]);
+
+        if (alumniResult.status === "fulfilled") {
+          setAlumni(normalizeObject(alumniResult.value.data));
+        } else {
+          console.log(alumniResult.reason);
+        }
+
+        if (dashboardResult.status === "fulfilled") {
+          setDashboard(normalizeObject(dashboardResult.value.data));
+        } else {
+          console.log(dashboardResult.reason);
+          setDashboard({});
+        }
+
+        const mentorships =
+          mentorshipResult.status === "fulfilled" &&
+          Array.isArray(mentorshipResult.value.data)
+            ? mentorshipResult.value.data
+            : [];
+
+        const acceptedMentees = mentorships.filter(
+          (mentorship) => mentorship?.status === "ACCEPTED"
+        );
+
+        if (mentorshipResult.status === "rejected") {
+          console.log(mentorshipResult.reason);
+        }
+
+        setMentees(acceptedMentees);
+      } catch (error) {
+        console.log(error);
+        setDashboard({});
+      }
+
+      setLoading(false);
+    };
+
+    loadDashboard();
+  }, [user]);
+
   const handleLogout = () => {
     localStorage.clear();
     navigate("/login");
   };
-  console.log("AlumniDashboard rendered");
-  
-  const analytics = [
-    {
-      title: "Jobs Posted",
-      value: "12",
-      subtitle: "Active posts",
-      icon: Briefcase,
-    },
-    {
-      title: "Events Posted",
-      value: "5",
-      subtitle: "This month",
-      icon: CalendarDays,
-    },
-    {
-      title: "Mentees",
-      value: "8",
-      subtitle: "Students guided",
-      icon: Users,
-    },
-    {
-      title: "Forum Answers",
-      value: "34",
-      subtitle: "Answered",
-      icon: MessageSquare,
-    },
-  ];
 
-  const mentees = [
-    {
-      name: "Vijay Kumar",
-      dept: "IT",
-      year: "2nd Year",
-      status: "Active",
-      initials: "VK",
-    },
-    {
-      name: "Sanjay Raj",
-      dept: "CSE",
-      year: "3rd Year",
-      status: "Pending",
-      initials: "SR",
-    },
-    {
-      name: "Priya S",
-      dept: "ECE",
-      year: "4th Year",
-      status: "Active",
-      initials: "PS",
-    },
-  ];
+  if (loading) {
+    return (
+      <LoadingState
+        title="Loading dashboard"
+        subtitle="Preparing mentorship, job and event activity."
+      />
+    );
+  }
 
-  const postedJobs = [
-    {
-      role: "Software Engineer Intern",
-      company: "Zoho Corporation",
-      applicants: 24,
-      status: "Active",
-    },
-    {
-      role: "Backend Developer Intern",
-      company: "Freshworks",
-      applicants: 18,
-      status: "Active",
-    },
-    {
-      role: "React Developer Intern",
-      company: "TCS",
-      applicants: 31,
-      status: "Closed",
-    },
-  ];
+  if (!user) {
+    return (
+      <div className="loading-state">
+        <div className="loading-card">
+          <div className="loading-mark error-mark">!</div>
+          <div>
+            <h2>Alumni session required</h2>
+            <p>Please login again to open the alumni dashboard.</p>
+          </div>
+          <button className="error-action" onClick={() => navigate("/login")}>
+            Go to Login
+          </button>
+        </div>
+      </div>
+    );
+  }
 
-  const postedEvents = [
-    {
-      title: "Full Stack Development Workshop",
-      registrations: 42,
-      seatsLeft: 8,
-      status: "OPEN",
-    },
-    {
-      title: "Resume Building Masterclass",
-      registrations: 50,
-      seatsLeft: 0,
-      status: "FULL",
-    },
-    {
-      title: "Java Backend Webinar",
-      registrations: 36,
-      seatsLeft: 14,
-      status: "OPEN",
-    },
-  ];
+  const safeDashboard = normalizeObject(dashboard);
+  const safeAlumni = normalizeObject(alumni);
+
+  const alumniName =
+    toDisplayText(
+      safeAlumni.name || safeDashboard.name || user?.name,
+      "Alumni"
+    );
+
+  const firstLetter = getFirstLetter(alumniName);
+  const profileImageUrl =
+    getProfileImageUrl(safeAlumni) || getProfileImageUrl(safeDashboard);
 
   return (
-    <div className="alumni-dashboard">
-      <aside className="ad-sidebar">
-        <div className="ad-logo">
+    <div className="alumni-dashboard-v2">
+      <aside className="alumni-sidebar-v2">
+        <div className="alumni-logo-v2">
           <BookOpen size={34} />
         </div>
 
-        <nav className="ad-menu">
+        <nav className="alumni-menu-v2">
           <a className="active">
             <LayoutDashboard size={20} />
             Dashboard
           </a>
-          <a onClick={() => navigate("/alumni/profile")}>
+
+          <a
+            onClick={() =>
+              navigate("/alumni/profile")
+            }
+          >
             <User size={20} />
             Profile
           </a>
-          <a>
+
+          <a
+            onClick={() =>
+              navigate("/alumni/mentorships")
+            }
+          >
             <Users size={20} />
             Mentorship
           </a>
-          <a onClick={()=>navigate("/alumni/jobs")}>
+
+          <a
+            onClick={() =>
+              navigate("/alumni/jobs")
+            }
+          >
             <Briefcase size={20} />
             Jobs / Internships
           </a>
-          <a onClick={()=>navigate("/alumni/events")}>
+
+          <a
+            onClick={() =>
+              navigate("/alumni/events")
+            }
+          >
             <CalendarDays size={20} />
             Events
           </a>
+
           <a onClick={() => navigate("/forum")}>
             <MessageSquare size={20} />
             Forum
           </a>
-          <a onClick={() => navigate("/notifications")}>
+
+          <a
+            onClick={() =>
+              navigate("/notifications")
+            }
+          >
             <Bell size={20} />
             Notifications
           </a>
+
           <a onClick={handleLogout}>
             <LogOut size={20} />
             Logout
@@ -163,190 +254,223 @@ function AlumniDashboard() {
         </nav>
       </aside>
 
-      <main className="ad-main">
-        <header className="ad-topbar">
-          <div className="ad-search">
-            <Search size={20} />
-            <input placeholder="Search students, jobs, events..." />
-          </div>
+      <main className="alumni-main-v2">
+        <header className="alumni-topbar-v2">
+          <h2>Alumni Dashboard</h2>
 
-          <div className="ad-top-actions">
-            <button className="ad-icon-btn">
+          <div className="alumni-top-actions-v2">
+            <button
+              className="alumni-icon-btn-v2"
+              onClick={() =>
+                navigate("/notifications")
+              }
+            >
               <Bell size={21} />
-              <span>4</span>
+              {unreadCount > 0 && <span>{unreadCount}</span>}
             </button>
 
-            <div className="ad-profile">
-              <div className="ad-avatar">AK</div>
+            <div className="alumni-profile-v2">
+              <div className="alumni-avatar-v2">
+                {profileImageUrl ? (
+                  <img src={profileImageUrl} alt={alumniName} />
+                ) : (
+                  firstLetter
+                )}
+              </div>
+
               <div>
-                <h4>Arun Kumar</h4>
+                <h4>{alumniName}</h4>
                 <p>Alumni</p>
               </div>
-              <ChevronDown size={18} />
             </div>
 
-            <button className="ad-logout" onClick={handleLogout}>
+            <button
+              className="alumni-logout-v2"
+              onClick={handleLogout}
+            >
               <LogOut size={18} />
               Logout
             </button>
           </div>
         </header>
 
-       {/* <section className="ad-hero-row">
-          <div className="ad-welcome-card">
+        <section className="alumni-hero-grid-v2">
+          <div className="alumni-welcome-v2">
             <div>
-              <p className="ad-small-title">Welcome back,</p>
-              <h1>Arun Kumar</h1>
-              <p className="ad-hero-text">
-                Manage mentorships, post career opportunities, organize events,
-                and support students through meaningful alumni guidance.
+              <p className="alumni-eyebrow-v2">
+                Welcome back,
               </p>
 
-              <div className="ad-hero-actions">
-                <button onClick={() => navigate("/alumni/jobs")}>Post Job</button>
-                <button className="outline"  onClick={() => navigate("/alumni/events")}>Create Event</button>
-                <button className="outline" onClick={() => navigate("/forum")}>Answer Forum</button>
+              <h1>{alumniName}</h1>
+
+              <p className="ad-hero-text">
+                {toDisplayText(
+                  safeAlumni.designation || safeDashboard.designation,
+                  "Alumni Mentor"
+                )}
+                {safeAlumni.company || safeDashboard.company
+                  ? ` at ${toDisplayText(
+                      safeAlumni.company || safeDashboard.company
+                    )}`
+                  : ""}
+              </p>
+
+              <p className="ad-hero-text">
+                Manage mentorships, jobs, events and
+                support students in their careers.
+              </p>
+
+              <div className="alumni-actions-v2">
+                <button
+                  onClick={() =>
+                    navigate("/alumni/jobs")
+                  }
+                >
+                  Post Job
+                </button>
+
+                <button
+                  className="outline"
+                  onClick={() =>
+                    navigate("/alumni/events")
+                  }
+                >
+                  Create Event
+                </button>
+
+                <button
+                  className="outline"
+                  onClick={() =>
+                    navigate("/forum")
+                  }
+                >
+                  Answer Forum
+                </button>
               </div>
             </div>
 
-            <div className="ad-hero-illustration">
-              <Users size={130} strokeWidth={1.4} />
+            <div className="alumni-illustration-v2">
+              <Users size={120} />
             </div>
           </div>
 
-          <div className="ad-mentees-card">
-            <div className="ad-card-head">
+          <div className="alumni-panel-v2">
+            <div className="alumni-panel-head-v2">
               <h3>My Mentees</h3>
               <Users size={20} />
             </div>
 
-            <div className="ad-mentees-list">
-              {mentees.map((student, index) => (
-                <div className="ad-mentee-item" key={index}>
-                  <div className="ad-mentee-avatar">{student.initials}</div>
+            <div className="alumni-mentees-list-v2">
+              {mentees.length === 0 ? (
+                <p>No accepted mentees.</p>
+              ) : (
+                mentees
+                  .slice(0, 3)
+                  .map((mentorship, index) => (
+                    <div
+                      className="alumni-mentee-v2"
+                      key={mentorship.id || mentorship.studentId || index}
+                    >
+                      <div className="alumni-mentee-avatar-v2">
+                        {getFirstLetter(mentorship.studentName, "S")}
+                      </div>
 
-                  <div className="ad-mentee-info">
-                    <h4>{student.name}</h4>
-                    <p>
-                      {student.dept} • {student.year}
-                    </p>
-                  </div>
+                      <div>
+                        <h4>
+                          {toDisplayText(mentorship.studentName, "Student")}
+                        </h4>
 
-                  <span
-                    className={`ad-mentee-status ${
-                      student.status === "Active" ? "active" : "pending"
-                    }`}
-                  >
-                    {student.status}
-                  </span>
-                </div>
-              ))}
+                        <p>
+                          {toDisplayText(mentorship.studentDepartment, "Department")}
+                          {" - Year "}
+                          {toDisplayText(mentorship.studentYear, "-")}
+                        </p>
+                      </div>
+
+                      <button
+                        onClick={() =>
+                          navigate(
+                            `/alumni/student/${toDisplayText(
+                              mentorship.studentId,
+                              ""
+                            )}`
+                          )
+                        }
+                      >
+                        View
+                      </button>
+                    </div>
+                  ))
+              )}
             </div>
 
-            <button className="ad-link-btn">
+            <button
+              className="alumni-link-btn-v2"
+              onClick={() =>
+                navigate("/alumni/mentorships")
+              }
+            >
               View All Mentees
-              <ArrowRight size={17} />
             </button>
           </div>
-        </section>*/}
+        </section>
 
-        {/*<section className="ad-analytics-grid">
-          {analytics.map((item, index) => {
-            const Icon = item.icon;
-
-            return (
-              <div className="ad-stat-card" key={index}>
-                <div className="ad-stat-icon">
-                  <Icon size={25} />
-                </div>
-
-                <div>
-                  <h3>{item.title}</h3>
-                  <h2>{item.value}</h2>
-                  <p>{item.subtitle}</p>
-                </div>
-              </div>
-            );
-          })}
-        </section>*/}
-
-        {/*<section className="ad-section-card">
-          <div className="ad-section-head">
-            <h2>Posted Jobs / Internships</h2>
-            <button>View all</button>
-          </div>
-
-          <div className="ad-table">
-            <div className="ad-table-head">
-              <span>Job Title</span>
-              <span>Company</span>
-              <span>Applicants</span>
-              <span>Status</span>
-              <span>Actions</span>
+        <section className="alumni-stats-v2">
+          <div className="alumni-stat-v2">
+            <div className="alumni-stat-icon-v2">
+              <Briefcase size={25} />
             </div>
 
-            {postedJobs.map((job, index) => (
-              <div className="ad-table-row" key={index}>
-                <span>{job.role}</span>
-                <span>{job.company}</span>
-                <span>{job.applicants} applicants</span>
-
-                <span
-                  className={`ad-status-pill ${
-                    job.status === "Active" ? "active" : "closed"
-                  }`}
-                >
-                  {job.status}
-                </span>
-
-                <div className="ad-action-icons">
-                  <button>
-                    <Eye size={17} />
-                  </button>
-                  <button>
-                    <Edit size={17} />
-                  </button>
-                  <button className="delete">
-                    <Trash2 size={17} />
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>*/}
-
-        {/*<section className="ad-section-card">
-          <div className="ad-section-head">
-            <h2>Posted Events</h2>
-            <button>View all</button>
+            <div>
+              <h3>Jobs Posted</h3>
+              <h2>
+                {toDisplayText(safeDashboard.postedJobsCount, "0")}
+              </h2>
+              <p>Total jobs</p>
+            </div>
           </div>
 
-          <div className="ad-events-grid">
-            {postedEvents.map((event, index) => (
-              <div
-                className={`ad-event-card ${
-                  event.status === "FULL" ? "full" : ""
-                }`}
-                key={index}
-              >
-                <div className="ad-event-icon">
-                  <CalendarDays size={38} />
-                </div>
+          <div className="alumni-stat-v2">
+            <div className="alumni-stat-icon-v2">
+              <CalendarDays size={25} />
+            </div>
 
-                <div className="ad-event-info">
-                  <h3>{event.title}</h3>
-                  <p>{event.registrations} registrations</p>
-                  <p>{event.seatsLeft} seats left</p>
-                </div>
-
-                <div className="ad-event-action">
-                  <span>{event.status}</span>
-                  <button>View Students</button>
-                </div>
-              </div>
-            ))}
+            <div>
+              <h3>Events Posted</h3>
+              <h2>
+                {toDisplayText(safeDashboard.postedEventsCount, "0")}
+              </h2>
+              <p>Total events</p>
+            </div>
           </div>
-        </section>*/}
+
+          <div className="alumni-stat-v2">
+            <div className="alumni-stat-icon-v2">
+              <Users size={25} />
+            </div>
+
+            <div>
+              <h3>My Mentees</h3>
+              <h2>{mentees.length}</h2>
+              <p>Accepted students</p>
+            </div>
+          </div>
+
+          <div className="alumni-stat-v2">
+            <div className="alumni-stat-icon-v2">
+              <MessageSquare size={25} />
+            </div>
+
+            <div>
+              <h3>Forum Answers</h3>
+              <h2>
+                {toDisplayText(safeDashboard.answeredQuestionsCount, "0")}
+              </h2>
+              <p>Questions answered</p>
+            </div>
+          </div>
+        </section>
+
       </main>
     </div>
   );

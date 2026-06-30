@@ -17,26 +17,59 @@ import {
 } from "lucide-react";
 import api from "../services/api";
 import "../styles/Forum.css";
+import { getProfileImageUrl } from "../utils/profileImage";
 
 function Forum() {
   const navigate = useNavigate();
 
   const [user, setUser] = useState(null);
+  const [profile, setProfile] = useState(null);
+  const [unreadCount, setUnreadCount] = useState(0);
   const [questions, setQuestions] = useState([]);
   const [search, setSearch] = useState("");
   const [questionForm, setQuestionForm] = useState({ title: "", description: "" });
 
   useEffect(() => {
-    const storedUser = JSON.parse(localStorage.getItem("user"));
+    const storedUser = localStorage.getItem("user");
 
     if (!storedUser) {
       navigate("/login");
       return;
     }
 
-    setUser(storedUser);
+    const loggedUser = JSON.parse(storedUser);
+
+    setUser(loggedUser);
+    fetchProfile(loggedUser);
+    fetchUnreadCount(loggedUser);
     fetchQuestions();
   }, [navigate]);
+
+  const fetchProfile = async (loggedUser) => {
+    try {
+      const endpoint =
+        loggedUser.role === "STUDENT"
+          ? `/students/${loggedUser.profileId}`
+          : `/alumni/${loggedUser.profileId}`;
+
+      const res = await api.get(endpoint);
+      setProfile(res.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const fetchUnreadCount = async (loggedUser) => {
+    try {
+      const res = await api.get(
+        `/notifications/${loggedUser.role}/${loggedUser.profileId}/unread`
+      );
+
+      setUnreadCount(res.data?.length || 0);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   const fetchQuestions = async () => {
     try {
@@ -114,8 +147,18 @@ function Forum() {
     .slice(0, 2)
     .toUpperCase();
 
+  const displayName = profile?.name || user?.name || "User";
+  const displayInitials = displayName
+    .split(" ")
+    .map((word) => word[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+  const profileImageUrl = getProfileImageUrl(profile);
+
   const profilePath = user?.role === "STUDENT" ? "/student/profile" : "/alumni/profile";
   const dashboardPath = user?.role === "STUDENT" ? "/student/dashboard" : "/alumni/dashboard";
+  const mentorshipPath = user?.role === "STUDENT" ? "/student/mentorships" : "/alumni/mentorships";
   const eventsPath = user?.role === "STUDENT" ? "/student/events" : "/alumni/events";
   const jobsPath = user?.role === "STUDENT" ? "/student/jobs" : "/alumni/jobs";
 
@@ -135,7 +178,7 @@ function Forum() {
             <User size={20} />
             Profile
           </a>
-          <a>
+          <a onClick={() => navigate(mentorshipPath)}>
             <Users size={20} />
             Mentorship
           </a>
@@ -177,13 +220,19 @@ function Forum() {
           <div className="fm-top-actions">
             <button className="fm-icon-btn" onClick={() => navigate("/notifications")}>
               <Bell size={21} />
-              <span>0</span>
+              {unreadCount > 0 && <span>{unreadCount}</span>}
             </button>
 
             <div className="fm-profile">
-              <div className="fm-avatar">{initials || "U"}</div>
+              <div className="fm-avatar">
+                {profileImageUrl ? (
+                  <img src={profileImageUrl} alt={displayName} />
+                ) : (
+                  displayInitials || initials || "U"
+                )}
+              </div>
               <div>
-                <h4>{user?.name || "User"}</h4>
+                <h4>{displayName}</h4>
                 <p>{user?.role}</p>
               </div>
               <ChevronDown size={18} />
@@ -211,19 +260,6 @@ function Forum() {
           </button>
         </section>
 
-        <section className="fm-filter-card">
-          <div className="fm-search-box">
-            <Search size={20} />
-            <input
-              placeholder="Search by question title..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-          </div>
-
-          <button onClick={handleSearch}>Search</button>
-          <button onClick={fetchQuestions}>Show All</button>
-        </section>
 
         {user?.role === "STUDENT" && (
           <section className="fm-question-form-card">
@@ -258,13 +294,26 @@ function Forum() {
             </form>
           </section>
         )}
-
+        
         <section className="fm-content-grid single">
           <div className="fm-section">
             <div className="fm-section-head">
               <h2>Forum Questions</h2>
               <p>Browse questions posted by students.</p>
             </div>
+          <section className="fm-filter-card">
+          <div className="fm-search-box">
+            <Search size={20} />
+            <input
+              placeholder="Search by question title..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
+
+          <button onClick={handleSearch}>Search</button>
+          <button onClick={fetchQuestions}>Show All</button>
+        </section>
 
             <div className="fm-questions-list">
               {questions.length === 0 ? (
@@ -288,8 +337,8 @@ function Forum() {
                     <p>{q.description}</p>
 
                     <div className="fm-question-meta">
-                      <span>Student ID: {q.studentId}</span>
-                      <span>❤️ {q.likeCount}</span>
+                      <span>Asked by: {q.studentName || `Student ${q.studentId}`}</span>
+                      <span>Likes: {q.likeCount}</span>
                     </div>
 
                     <div className="fm-question-actions">
@@ -313,3 +362,4 @@ function Forum() {
 }
 
 export default Forum;
+
