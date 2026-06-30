@@ -1,0 +1,491 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap");
+
+* {
+  box-sizing: border-box;
+  font-family: "Poppins", sans-serif;
+}
+
+body {
+  margin: 0;
+  background: #f7f5fb;
+  color: #17132f;
+}
+
+.student-mentorship-layout {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  background: #f7f5fb;
+}
+
+.sm-sidebar {
+  min-height: 100vh;
+  background: linear-gradient(180deg, #17053f 0%, #0d0228 100%);
+  padding: 28px 18px;
+  color: white;
+  position: sticky;
+  top: 0;
+}
+
+.sm-logo {
+  width: 72px;
+  height: 72px;
+  margin: 0 auto 34px;
+  border-radius: 22px;
+  display: grid;
+  place-items: center;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.sm-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sm-menu a {
+  height: 52px;
+  border-radius: 15px;
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.25s ease;
+}
+
+.sm-menu a:hover,
+.sm-menu a.active {
+  background: #4b1fb8;
+  color: white;
+}
+
+.sm-main {
+  padding: 24px 28px 42px;
+}
+
+.sm-topbar {
+  height: 64px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.sm-search-top {
+  width: 520px;
+  height: 52px;
+  background: white;
+  border: 1px solid #e8e3f3;
+  border-radius: 17px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 18px;
+  box-shadow: 0 12px 32px rgba(23, 5, 63, 0.06);
+}
+
+.sm-search-top input {
+  width: 100%;
+  border: none;
+  outline: none;
+  color: #17132f;
+  font-size: 14px;
+}
+
+.sm-top-actions {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.sm-icon-btn {
+  width: 48px;
+  height: 48px;
+  border-radius: 16px;
+  border: 1px solid #e8e3f3;
+  background: white;
+  position: relative;
+  cursor: pointer;
+}
+
+.sm-icon-btn span {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 21px;
+  height: 21px;
+  border-radius: 50%;
+  background: #4b1fb8;
+  color: white;
+  font-size: 12px;
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+}
+
+.sm-profile {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.sm-avatar {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: #17053f;
+  color: white;
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+}
+
+.sm-profile h4 {
+  margin: 0;
+  font-size: 15px;
+}
+
+.sm-profile p {
+  margin: 0;
+  color: #74708a;
+  font-size: 13px;
+}
+
+.sm-logout {
+  height: 46px;
+  padding: 0 18px;
+  border-radius: 14px;
+  border: 1px solid #d5c8ff;
+  background: white;
+  color: #4b1fb8;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.sm-page-head {
+  min-height: 165px;
+  padding: 30px 34px;
+  border-radius: 24px;
+  background: linear-gradient(135deg, #ffffff 0%, #f3efff 100%);
+  border: 1px solid #e8e3f3;
+  box-shadow: 0 16px 40px rgba(23, 5, 63, 0.07);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.sm-page-head p {
+  margin: 0 0 8px;
+  color: #4b1fb8;
+  font-weight: 800;
+}
+
+.sm-page-head h1 {
+  margin: 0;
+  color: #17053f;
+  font-size: 34px;
+}
+
+.sm-page-head span {
+  display: block;
+  margin-top: 10px;
+  max-width: 650px;
+  color: #74708a;
+  line-height: 1.7;
+}
+
+.sm-request-box {
+  width: 210px;
+  min-height: 100px;
+  border-radius: 20px;
+  background: white;
+  border: 1px solid #e8e3f3;
+  box-shadow: 0 14px 35px rgba(23, 5, 63, 0.08);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 22px;
+}
+
+.sm-request-box p {
+  margin: 0;
+  color: #74708a;
+  font-size: 13px;
+}
+
+.sm-request-box strong {
+  margin-top: 8px;
+  color: #4b1fb8;
+  font-size: 18px;
+}
+
+.sm-filter-card {
+  padding: 20px;
+  border-radius: 22px;
+  background: white;
+  border: 1px solid #e8e3f3;
+  box-shadow: 0 16px 40px rgba(23, 5, 63, 0.06);
+  display: grid;
+  grid-template-columns: 1.5fr 0.7fr 0.7fr;
+  gap: 16px;
+  margin-bottom: 30px;
+}
+
+.sm-search-box,
+.sm-filter-box {
+  height: 54px;
+  border-radius: 16px;
+  background: #faf9ff;
+  border: 1px solid #ece7f6;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 16px;
+  color: #4b1fb8;
+}
+
+.sm-search-box input,
+.sm-filter-box select {
+  width: 100%;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: #17132f;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.sm-section {
+  margin-top: 30px;
+}
+
+.sm-section-head {
+  margin-bottom: 18px;
+}
+
+.sm-section-head h2 {
+  margin: 0;
+  color: #17053f;
+  font-size: 24px;
+}
+
+.sm-section-head p {
+  margin: 6px 0 0;
+  color: #74708a;
+  font-size: 14px;
+}
+
+/* 3 CARDS PER ROW */
+
+.sm-alumni-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+/* CARD STYLE LIKE SAMPLE */
+
+.sm-alumni-card {
+  min-height: 245px;
+  background: #ffffff;
+  border: 2px solid #b9eef8;
+  border-radius: 16px;
+  padding: 22px;
+  box-shadow: 0 12px 30px rgba(23, 5, 63, 0.05);
+  transition: 0.25s ease;
+}
+
+.sm-alumni-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 20px 45px rgba(23, 5, 63, 0.1);
+}
+
+.sm-alumni-card.disabled {
+  opacity: 0.65;
+}
+
+.sm-alumni-image {
+  width: 78px;
+  height: 78px;
+  border-radius: 50%;
+  background: #1098f7;
+  overflow: hidden;
+  float: left;
+  margin-right: 20px;
+  margin-bottom: 10px;
+}
+
+.sm-alumni-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.sm-alumni-initial {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: #1098f7;
+  color: white;
+  display: grid;
+  place-items: center;
+  font-size: 24px;
+  font-weight: 800;
+}
+
+.sm-alumni-body {
+  min-height: 200px;
+}
+
+.sm-alumni-body h3 {
+  margin: 4px 0 6px;
+  color: #17132f;
+  font-size: 20px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.sm-role {
+  margin: 0;
+  color: #26314f;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.sm-company {
+  margin-top: 6px;
+  color: #4b1fb8;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.sm-company svg {
+  color: #4b1fb8;
+}
+
+.sm-bio {
+  clear: both;
+  margin: 18px 0 12px;
+  color: #74708a;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.sm-skills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.sm-skills span {
+  padding: 6px 11px;
+  border-radius: 999px;
+  background: #eaf6ff;
+  color: #006fd6;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.sm-request-btn,
+.sm-requested-btn {
+  width: 100%;
+  height: 42px;
+  border: none;
+  border-radius: 12px;
+  color: white;
+  font-size: 13px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  cursor: pointer;
+}
+
+.sm-request-btn {
+  background: #4b1fb8;
+}
+
+.sm-request-btn:hover {
+  background: #35118d;
+}
+
+.sm-request-btn:disabled {
+  background: #b5aacd;
+  cursor: not-allowed;
+}
+
+.sm-requested-btn {
+  background: #078245;
+}
+
+.sm-empty {
+  grid-column: 1 / -1;
+  min-height: 180px;
+  border: 2px dashed #d7c9ff;
+  border-radius: 18px;
+  background: white;
+  color: #74708a;
+  display: grid;
+  place-items: center;
+  font-size: 17px;
+  font-weight: 700;
+}
+
+@media (max-width: 1100px) {
+  .student-mentorship-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .sm-sidebar {
+    display: none;
+  }
+
+  .sm-topbar,
+  .sm-page-head {
+    height: auto;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 18px;
+  }
+
+  .sm-search-top {
+    width: 100%;
+  }
+
+  .sm-filter-card {
+    grid-template-columns: 1fr;
+  }
+
+  .sm-alumni-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .sm-request-box {
+    width: 100%;
+  }
+}
+
+@media (max-width: 700px) {
+  .sm-main {
+    padding: 18px;
+  }
+
+  .sm-alumni-grid {
+    grid-template-columns: 1fr;
+  }
+}

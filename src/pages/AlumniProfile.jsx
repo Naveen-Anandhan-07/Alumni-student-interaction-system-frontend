@@ -1,5 +1,18 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import {
+  Bell,
+  BookOpen,
+  Briefcase,
+  Building,
+  CalendarDays,
+  LayoutDashboard,
+  LogOut,
+  MessageSquare,
+  Star,
+  User,
+  Users,
+} from "lucide-react";
 import api from "../services/api";
 import "../styles/Profile.css";
 
@@ -8,58 +21,135 @@ function AlumniProfile() {
 
   const [alumni, setAlumni] = useState(null);
   const [dashboard, setDashboard] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const user = JSON.parse(localStorage.getItem("user"));
+    const storedUser = localStorage.getItem("user");
 
-    if (!user || user.role !== "ALUMNI") {
+    if (!storedUser) {
       navigate("/login");
       return;
     }
 
-    const fetchData = async () => {
-      try {
-        const profileRes = await api.get(`/alumni/${user.profileId}`);
-        const dashboardRes = await api.get(`/dashboard/alumni/${user.profileId}`);
+    const user = JSON.parse(storedUser);
 
-        setAlumni(profileRes.data);
-        setDashboard(dashboardRes.data);
-      } catch (error) {
-        console.log(error);
-        alert("Failed to load alumni profile");
-      }
-    };
+    if (user.role !== "ALUMNI") {
+      navigate("/login");
+      return;
+    }
 
-    fetchData();
+    loadProfile(user.profileId);
   }, [navigate]);
+
+  const loadProfile = async (alumniId) => {
+    try {
+      const profileResponse = await api.get(
+        `/alumni/${alumniId}`
+      );
+
+      const dashboardResponse = await api.get(
+        `/dashboard/alumni/${alumniId}`
+      );
+
+      setAlumni(profileResponse.data);
+      setDashboard(dashboardResponse.data);
+    } catch (error) {
+      console.log(error);
+      alert("Failed to load alumni profile");
+    }
+
+    setLoading(false);
+  };
 
   const handleLogout = () => {
     localStorage.clear();
     navigate("/login");
   };
 
-  if (!alumni) {
-    return <div className="profile-loading">Loading profile...</div>;
+  if (loading) {
+    return (
+      <div className="profile-loading">
+        Loading profile...
+      </div>
+    );
   }
 
-  const skills = alumni.skills ? alumni.skills.split(",") : [];
+  if (!alumni) {
+    return (
+      <div className="profile-loading">
+        Alumni profile is not available.
+      </div>
+    );
+  }
+
+  const skills = alumni.skills
+    ? alumni.skills.split(",")
+    : [];
+
+  const firstLetter = alumni.name
+    ? alumni.name.charAt(0).toUpperCase()
+    : "A";
 
   return (
     <div className="profile-page">
       <aside className="profile-sidebar">
-        <div className="logo">🎓 Alumni Portal</div>
+        <div className="logo">
+          <BookOpen size={28} />
+          Alumni Portal
+        </div>
 
         <nav>
-          <span>Dashboard</span>
-          <span className="active">Profile</span>
-          <span>My Events</span>
-          <span>Jobs</span>
-          <span>Mentorship</span>
-          <span onClick={() => navigate("/forum")}>Forum</span>
-          <span onClick={() => navigate("/notifications")}>Notifications</span>
+          <span
+            onClick={() => navigate("/alumni/dashboard")}
+          >
+            <LayoutDashboard size={18} />
+            Dashboard
+          </span>
+
+          <span className="active">
+            <User size={18} />
+            Profile
+          </span>
+
+          <span
+            onClick={() => navigate("/alumni/mentorships")}
+          >
+            <Users size={18} />
+            Mentorship
+          </span>
+
+          <span
+            onClick={() => navigate("/alumni/jobs")}
+          >
+            <Briefcase size={18} />
+            Jobs
+          </span>
+
+          <span
+            onClick={() => navigate("/alumni/events")}
+          >
+            <CalendarDays size={18} />
+            Events
+          </span>
+
+          <span onClick={() => navigate("/forum")}>
+            <MessageSquare size={18} />
+            Forum
+          </span>
+
+          <span
+            onClick={() => navigate("/notifications")}
+          >
+            <Bell size={18} />
+            Notifications
+          </span>
         </nav>
 
-        <button className="logout-btn" onClick={handleLogout}>
+        <button
+          className="logout-btn"
+          onClick={handleLogout}
+        >
+          <LogOut size={18} />
           Log Out
         </button>
       </aside>
@@ -67,63 +157,115 @@ function AlumniProfile() {
       <main className="profile-main">
         <section className="profile-grid">
           <div className="glass-card intro-card">
-            <p className="small-title">Alumni Profile</p>
+            <p className="small-title">
+              Alumni Profile
+            </p>
+
             <h1>{alumni.name}</h1>
+
             <p>
-              Alumni mentor helping students with career guidance, technical
-              growth, events and job opportunities.
+              Alumni mentor helping students with career
+              guidance, technical growth, events and job
+              opportunities.
             </p>
           </div>
 
           <div className="glass-card user-card">
-            <div className="avatar">{alumni.name?.slice(0, 2).toUpperCase()}</div>
+            <div className="avatar">
+              {firstLetter}
+            </div>
+
             <h2>{alumni.name}</h2>
             <p>{alumni.email}</p>
+
             <div className="line"></div>
-            <p>🏢 {alumni.company}</p>
-            <p>💼 {alumni.designation}</p>
-            <p>⭐ {alumni.experience} years experience</p>
+
+            <p>
+              <Building size={17} />
+              {alumni.company || "Company not provided"}
+            </p>
+
+            <p>
+              <Briefcase size={17} />
+              {alumni.designation ||
+                "Designation not provided"}
+            </p>
+
+            <p>
+              <Star size={17} />
+              {alumni.experience || 0} years experience
+            </p>
           </div>
 
           <div className="glass-card stat-box">
             <h3>Events</h3>
-            <h2>{dashboard?.postedEventsCount ?? 0}</h2>
+            <h2>
+              {dashboard?.postedEventsCount || 0}
+            </h2>
             <p>Posted events</p>
           </div>
 
           <div className="glass-card stat-box">
-            <h3>Students</h3>
-            <h2>{dashboard?.totalRegisteredStudents ?? 0}</h2>
-            <p>Total registrations</p>
+            <h3>Registrations</h3>
+            <h2>
+              {dashboard
+                ?.totalRegisteredStudentsForEvents || 0}
+            </h2>
+            <p>Student registrations</p>
           </div>
 
           <div className="glass-card stat-box">
             <h3>Answers</h3>
-            <h2>{dashboard?.answeredQuestionsCount ?? 0}</h2>
+            <h2>
+              {dashboard?.answeredQuestionsCount || 0}
+            </h2>
             <p>Forum answers</p>
           </div>
 
           <div className="glass-card stat-box">
             <h3>Jobs</h3>
-            <h2>{dashboard?.postedJobsCount ?? 0}</h2>
+            <h2>
+              {dashboard?.postedJobsCount || 0}
+            </h2>
             <p>Posted jobs</p>
           </div>
 
           <div className="glass-card wide-card">
             <h3>Skills</h3>
+
             <div className="skill-list">
-              {skills.map((skill) => (
-                <span key={skill}>{skill.trim()}</span>
-              ))}
+              {skills.length === 0 ? (
+                <span>No skills added</span>
+              ) : (
+                skills.map((skill, index) => (
+                  <span key={index}>
+                    {skill.trim()}
+                  </span>
+                ))
+              )}
             </div>
           </div>
 
           <div className="glass-card wide-card">
             <h3>Mentorship</h3>
+
             <div className="list-item">
               <span>Requests Received</span>
-              <b>{dashboard?.mentorshipRequestsReceived ?? 0}</b>
+
+              <b>
+                {dashboard
+                  ?.mentorshipRequestsReceivedCount || 0}
+              </b>
             </div>
+
+            <button
+              className="logout-btn"
+              onClick={() =>
+                navigate("/alumni/mentorships")
+              }
+            >
+              View Mentorships
+            </button>
           </div>
         </section>
       </main>

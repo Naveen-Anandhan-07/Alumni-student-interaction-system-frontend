@@ -1,15 +1,13 @@
-import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import {
   Bell,
   BookOpen,
   Briefcase,
   CalendarDays,
-  ChevronDown,
   LayoutDashboard,
   LogOut,
   MessageSquare,
-  Search,
   User,
   Users,
 } from "lucide-react";
@@ -18,56 +16,72 @@ import "../styles/Profile.css";
 
 function StudentProfile() {
   const navigate = useNavigate();
+  const { studentId } = useParams();
 
   const [student, setStudent] = useState(null);
   const [dashboard, setDashboard] = useState(null);
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const storedUser = JSON.parse(localStorage.getItem("user"));
+    const storedUser = localStorage.getItem("user");
 
-    if (!storedUser || storedUser.role !== "STUDENT") {
+    if (!storedUser) {
       navigate("/login");
       return;
     }
 
-    setUser(storedUser);
+    const loggedUser = JSON.parse(storedUser);
+    let profileId = loggedUser.profileId;
 
-    const fetchData = async () => {
-      try {
-        const profileRes = await api.get(`/students/${storedUser.profileId}`);
-        const dashboardRes = await api.get(
-          `/dashboard/student/${storedUser.profileId}`
-        );
-
-        setStudent(profileRes.data);
-        setDashboard(dashboardRes.data);
-      } catch (error) {
-        console.log(error);
-        alert("Failed to load student profile");
+    if (loggedUser.role === "ALUMNI") {
+      if (!studentId) {
+        navigate("/alumni/dashboard");
+        return;
       }
-    };
 
-    fetchData();
-  }, [navigate]);
+      profileId = studentId;
+    }
+
+    setUser(loggedUser);
+    loadProfile(profileId);
+  }, [navigate, studentId]);
+
+  const loadProfile = async (profileId) => {
+    try {
+      const profileResponse = await api.get(`/students/${profileId}`);
+      const dashboardResponse = await api.get(
+        `/dashboard/student/${profileId}`
+      );
+
+      setStudent(profileResponse.data);
+      setDashboard(dashboardResponse.data);
+    } catch (error) {
+      console.log(error);
+      alert("Failed to load student profile");
+    }
+
+    setLoading(false);
+  };
 
   const handleLogout = () => {
     localStorage.clear();
     navigate("/login");
   };
 
-  if (!student) {
+  if (loading) {
     return <div className="pf-loading">Loading profile...</div>;
   }
 
-  const skills = student.skills ? student.skills.split(",") : [];
+  if (!student) {
+    return <div className="pf-loading">Student profile not found.</div>;
+  }
 
-  const initials = student.name
-    ?.split(" ")
-    .map((word) => word[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
+  const skills = student.skills ? student.skills.split(",") : [];
+  const isAlumni = user?.role === "ALUMNI";
+  const firstLetter = student.name
+    ? student.name.charAt(0).toUpperCase()
+    : "S";
 
   return (
     <div className="student-profile-layout">
@@ -77,27 +91,51 @@ function StudentProfile() {
         </div>
 
         <nav className="pf-menu">
-          <a onClick={() => navigate("/student/dashboard")}>
+          <a
+            onClick={() =>
+              navigate(
+                isAlumni ? "/alumni/dashboard" : "/student/dashboard"
+              )
+            }
+          >
             <LayoutDashboard size={20} />
             Dashboard
           </a>
 
-          <a className="active">
-            <User size={20} />
-            Profile
-          </a>
+          {!isAlumni && (
+            <a className="active">
+              <User size={20} />
+              Profile
+            </a>
+          )}
 
-          <a>
+          <a
+            onClick={() =>
+              navigate(
+                isAlumni
+                  ? "/alumni/mentorships"
+                  : "/student/mentorships"
+              )
+            }
+          >
             <Users size={20} />
             Mentorship
           </a>
 
-          <a onClick={() => navigate("/student/jobs")}>
+          <a
+            onClick={() =>
+              navigate(isAlumni ? "/alumni/jobs" : "/student/jobs")
+            }
+          >
             <Briefcase size={20} />
             Jobs / Internships
           </a>
 
-          <a onClick={() => navigate("/student/events")}>
+          <a
+            onClick={() =>
+              navigate(isAlumni ? "/alumni/events" : "/student/events")
+            }
+          >
             <CalendarDays size={20} />
             Events
           </a>
@@ -120,53 +158,32 @@ function StudentProfile() {
       </aside>
 
       <main className="pf-main">
-        <header className="pf-topbar">
-          <div className="pf-search-top">
-            <Search size={20} />
-            <input placeholder="Search profile, jobs, events..." />
-          </div>
-
-          <div className="pf-top-actions">
-            <button
-              className="pf-icon-btn"
-              onClick={() => navigate("/notifications")}
-            >
-              <Bell size={21} />
-              <span>0</span>
-            </button>
-
-            <div className="pf-user-mini">
-              <div className="pf-mini-avatar">{initials || "S"}</div>
-              <div>
-                <h4>{student.name}</h4>
-                <p>{user?.role}</p>
-              </div>
-              <ChevronDown size={18} />
-            </div>
-
-            <button className="pf-logout" onClick={handleLogout}>
-              <LogOut size={18} />
-              Logout
-            </button>
-          </div>
-        </header>
-
         <section className="pf-page-head">
           <div>
-            <p>Student Profile</p>
+            <p>{isAlumni ? "Mentee Profile" : "Student Profile"}</p>
             <h1>{student.name}</h1>
             <span>
-              Manage your academic profile, skills, mentorship status, events,
-              jobs and forum activity.
+              {isAlumni
+                ? "View the student's academic details and skills."
+                : "Your academic profile, skills and activity summary."}
             </span>
           </div>
 
-          <div className="pf-head-avatar">{initials || "S"}</div>
+          <div className="pf-head-avatar">{firstLetter}</div>
         </section>
+
+        {isAlumni && (
+          <button
+            className="pf-logout"
+            onClick={() => navigate("/alumni/mentorships")}
+          >
+            Back to Mentorships
+          </button>
+        )}
 
         <section className="pf-profile-grid">
           <div className="pf-profile-card">
-            <div className="pf-avatar-large">{initials || "S"}</div>
+            <div className="pf-avatar-large">{firstLetter}</div>
 
             <h2>{student.name}</h2>
             <p>{student.email}</p>
@@ -176,12 +193,12 @@ function StudentProfile() {
             <div className="pf-info-list">
               <div>
                 <span>Department</span>
-                <strong>{student.department}</strong>
+                <strong>{student.department || "Not provided"}</strong>
               </div>
 
               <div>
                 <span>Year</span>
-                <strong>{student.year}</strong>
+                <strong>{student.year || "Not provided"}</strong>
               </div>
 
               <div>
@@ -193,60 +210,59 @@ function StudentProfile() {
 
           <div className="pf-stats-grid">
             <div className="pf-stat-card">
-              <h3>Mentorship</h3>
-              <h2>{dashboard?.mentorshipRequestCount ?? 0}</h2>
-              <p>Mentorship requests</p>
+              <h3>Mentorship Requests</h3>
+              <h2>{dashboard?.totalMentorshipRequests || 0}</h2>
             </div>
 
             <div className="pf-stat-card">
-              <h3>Events</h3>
-              <h2>{dashboard?.registeredEventsCount ?? 0}</h2>
-              <p>Registered events</p>
+              <h3>Registered Events</h3>
+              <h2>{dashboard?.registeredEventsCount || 0}</h2>
             </div>
 
             <div className="pf-stat-card">
-              <h3>Forum</h3>
-              <h2>{dashboard?.postedQuestionsCount ?? 0}</h2>
-              <p>Questions posted</p>
+              <h3>Forum Questions</h3>
+              <h2>{dashboard?.postedQuestionsCount || 0}</h2>
             </div>
 
             <div className="pf-stat-card">
-              <h3>Jobs</h3>
-              <h2>{dashboard?.availableJobsCount ?? 0}</h2>
-              <p>Available jobs</p>
+              <h3>Available Jobs</h3>
+              <h2>{dashboard?.availableJobsCount || 0}</h2>
             </div>
           </div>
 
           <div className="pf-section-card">
             <div className="pf-section-head">
               <h2>Skills</h2>
-              <p>Technologies and areas you are interested in.</p>
+              <p>Technologies and career interests.</p>
             </div>
 
             <div className="pf-skills">
               {skills.length === 0 ? (
                 <span>No skills added</span>
               ) : (
-                skills.map((skill) => <span key={skill}>{skill.trim()}</span>)
+                skills.map((skill, index) => (
+                  <span key={index}>{skill.trim()}</span>
+                ))
               )}
             </div>
           </div>
 
           <div className="pf-section-card">
             <div className="pf-section-head">
-              <h2>Status</h2>
-              <p>Your current mentorship and recommendation summary.</p>
+              <h2>Mentorship Status</h2>
             </div>
 
             <div className="pf-status-list">
               <div>
                 <span>Accepted Mentor</span>
-                <strong>{dashboard?.acceptedMentorStatus || "NONE"}</strong>
+                <strong>
+                  {dashboard?.hasAcceptedMentor ? "YES" : "NO"}
+                </strong>
               </div>
 
               <div>
                 <span>Recommended Events</span>
-                <strong>{dashboard?.recommendedEventsCount ?? 0}</strong>
+                <strong>{dashboard?.recommendedEventsCount || 0}</strong>
               </div>
             </div>
           </div>
