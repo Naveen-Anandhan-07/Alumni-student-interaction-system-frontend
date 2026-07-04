@@ -17,29 +17,47 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import api from "../services/api";
+import LoadingState from "../components/LoadingState";
 import "../styles/StudentMentorship.css";
+import { getProfileImageUrl } from "../utils/profileImage";
+import useUnreadNotifications from "../hooks/useUnreadNotifications";
 
 function StudentMentorship() {
   const navigate = useNavigate();
 
   const [user, setUser] = useState(null);
+  const [student, setStudent] = useState(null);
   const [alumniList, setAlumniList] = useState([]);
   const [mentorships, setMentorships] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [activeRequestAlumniId, setActiveRequestAlumniId] = useState(null);
+  const [requestMessage, setRequestMessage] = useState("");
+  const unreadCount = useUnreadNotifications(user);
 
   useEffect(() => {
-    const storedUser = JSON.parse(localStorage.getItem("user"));
+    const storedUser = localStorage.getItem("user");
 
     if (!storedUser) {
       navigate("/login");
       return;
     }
 
-    setUser(storedUser);
-    loadData(storedUser.profileId);
+    const loggedUser = JSON.parse(storedUser);
+
+    if (loggedUser.role !== "STUDENT") {
+      navigate("/login");
+      return;
+    }
+
+    setUser(loggedUser);
+    loadData(loggedUser.profileId);
   }, [navigate]);
 
   const loadData = async (studentId) => {
     try {
+      const studentRes = await api.get(`/students/${studentId}`);
+      setStudent(studentRes.data);
+
       const alumniRes = await api.get("/alumni");
       setAlumniList(alumniRes.data);
 
@@ -47,7 +65,16 @@ function StudentMentorship() {
       setMentorships(requestRes.data);
     } catch (error) {
       console.log(error);
+      alert("Failed to load mentorship data");
+    } finally {
+      setLoading(false);
     }
+  };
+
+  const handleLogout = () => {
+    localStorage.clear();
+    window.dispatchEvent(new Event("auth-changed"));
+    navigate("/login");
   };
 
   const hasAcceptedMentor = mentorships.some(
@@ -56,10 +83,6 @@ function StudentMentorship() {
 
   const hasAnyPendingRequest = mentorships.some(
     (m) => m.status === "PENDING"
-  );
-
-  const acceptedMentorship = mentorships.find(
-    (m) => m.status === "ACCEPTED"
   );
 
   const sendMentorshipRequest = async (alumniId) => {
@@ -73,19 +96,38 @@ function StudentMentorship() {
       return;
     }
 
+    const message = requestMessage.trim();
+
+    if (!message) {
+      alert("Please write a short message for your mentorship request.");
+      return;
+    }
+
     try {
       await api.post("/mentorships", {
         studentId: user.profileId,
         alumniId: alumniId,
-        message: "I would like to request you as my mentor.",
+        message,
       });
 
       alert("Mentorship request sent successfully");
+      setActiveRequestAlumniId(null);
+      setRequestMessage("");
       loadData(user.profileId);
     } catch (error) {
       console.log(error);
       alert("Failed to send mentorship request");
     }
+  };
+
+  const startMentorshipRequest = (alumniId) => {
+    setActiveRequestAlumniId(alumniId);
+    setRequestMessage("");
+  };
+
+  const cancelMentorshipRequest = () => {
+    setActiveRequestAlumniId(null);
+    setRequestMessage("");
   };
 
   const isPendingForThisAlumni = (alumniId) => {
@@ -99,6 +141,19 @@ function StudentMentorship() {
       (m) => m.alumniId === alumniId && m.status === "ACCEPTED"
     );
   };
+
+  if (loading) {
+    return (
+      <LoadingState
+        title="Loading mentorships"
+        subtitle="Checking your mentor requests and alumni matches."
+      />
+    );
+  }
+
+  const displayName = student?.name || user?.name || "Student";
+  const initials = displayName.substring(0, 2).toUpperCase();
+  const profileImageUrl = getProfileImageUrl(student);
 
   return (
     <div className="student-mentorship-layout">
@@ -136,13 +191,7 @@ function StudentMentorship() {
             <Bell size={20} />
             Notifications
           </a>
-          <a
-            onClick={() => {
-              localStorage.clear();
-              window.dispatchEvent(new Event("auth-changed"));
-              navigate("/login");
-            }}
-          >
+          <a onClick={handleLogout}>
             <LogOut size={20} />
             Logout
           </a>
@@ -157,30 +206,30 @@ function StudentMentorship() {
           </div>
 
           <div className="sm-top-actions">
-            <button className="sm-icon-btn">
+            <button
+              className="sm-icon-btn"
+              onClick={() => navigate("/notifications")}
+            >
               <Bell size={21} />
-              <span>3</span>
+              {unreadCount > 0 && <span>{unreadCount}</span>}
             </button>
 
             <div className="sm-profile">
               <div className="sm-avatar">
-                {user?.name?.substring(0, 2).toUpperCase() || "ST"}
+                {profileImageUrl ? (
+                  <img src={profileImageUrl} alt={displayName} />
+                ) : (
+                  initials
+                )}
               </div>
               <div>
-                <h4>{user?.name || "Student"}</h4>
+                <h4>{displayName}</h4>
                 <p>Student</p>
               </div>
               <ChevronDown size={18} />
             </div>
 
-            <button
-              className="sm-logout"
-              onClick={() => {
-                localStorage.clear();
-                window.dispatchEvent(new Event("auth-changed"));
-                navigate("/login");
-              }}
-            >
+            <button className="sm-logout" onClick={handleLogout}>
               <LogOut size={18} />
               Logout
             </button>
@@ -277,7 +326,12 @@ function StudentMentorship() {
                   hasAnyPendingRequest={hasAnyPendingRequest}
                   pendingForThisAlumni={isPendingForThisAlumni(alumni.id)}
                   acceptedForThisAlumni={isAcceptedForThisAlumni(alumni.id)}
-                  onRequest={sendMentorshipRequest}
+                  isWritingRequest={activeRequestAlumniId === alumni.id}
+                  requestMessage={requestMessage}
+                  onMessageChange={setRequestMessage}
+                  onStartRequest={startMentorshipRequest}
+                  onSendRequest={sendMentorshipRequest}
+                  onCancelRequest={cancelMentorshipRequest}
                 />
               ))
             )}
@@ -294,7 +348,12 @@ function AlumniCard({
   hasAnyPendingRequest,
   pendingForThisAlumni,
   acceptedForThisAlumni,
-  onRequest,
+  isWritingRequest,
+  requestMessage,
+  onMessageChange,
+  onStartRequest,
+  onSendRequest,
+  onCancelRequest,
 }) {
   const disabled =
     hasAcceptedMentor || hasAnyPendingRequest;
@@ -336,8 +395,7 @@ function AlumniCard({
         </div>
 
         <p className="sm-bio">
-          Experienced alumni mentor who can guide students in career growth,
-          projects and interview preparation.
+          {alumni.bio || alumni.about || "Bio not provided."}
         </p>
 
         <div className="sm-skills">
@@ -348,22 +406,56 @@ function AlumniCard({
           )}
         </div>
 
-        <button
-          className={
-            pendingForThisAlumni || acceptedForThisAlumni
-              ? "sm-requested-btn"
-              : "sm-request-btn"
-          }
-          disabled={disabled}
-          onClick={() => onRequest(alumni.id)}
-        >
-          {pendingForThisAlumni || acceptedForThisAlumni ? (
-            <CheckCircle size={17} />
-          ) : (
-            <Send size={17} />
-          )}
-          {buttonText}
-        </button>
+        {isWritingRequest ? (
+          <div className="sm-message-composer">
+            <label>
+              Message to alumni
+              <textarea
+                value={requestMessage}
+                onChange={(e) => onMessageChange(e.target.value)}
+                placeholder="Write why you would like guidance from this alumni."
+                rows={4}
+              />
+            </label>
+
+            <div className="sm-message-actions">
+              <button
+                type="button"
+                className="sm-cancel-btn"
+                onClick={onCancelRequest}
+              >
+                Cancel
+              </button>
+
+              <button
+                type="button"
+                className="sm-request-btn"
+                disabled={!requestMessage.trim()}
+                onClick={() => onSendRequest(alumni.id)}
+              >
+                <Send size={17} />
+                Send Request
+              </button>
+            </div>
+          </div>
+        ) : (
+          <button
+            className={
+              pendingForThisAlumni || acceptedForThisAlumni
+                ? "sm-requested-btn"
+                : "sm-request-btn"
+            }
+            disabled={disabled}
+            onClick={() => onStartRequest(alumni.id)}
+          >
+            {pendingForThisAlumni || acceptedForThisAlumni ? (
+              <CheckCircle size={17} />
+            ) : (
+              <Send size={17} />
+            )}
+            {buttonText}
+          </button>
+        )}
       </div>
     </div>
   );

@@ -18,20 +18,27 @@ import {
   Users,
   X,
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import api from "../services/api";
+import LoadingState from "../components/LoadingState";
 import "../styles/AlumniJobs.css";
+import { getProfileImageUrl } from "../utils/profileImage";
+import useUnreadNotifications from "../hooks/useUnreadNotifications";
 
 function AlumniJobs() {
-  const alumniId = 1;
-
+  const navigate = useNavigate();
+  const [alumni, setAlumni] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const [jobs, setJobs] = useState([]);
   const [myJobs, setMyJobs] = useState([]);
   const [applicants, setApplicants] = useState([]);
   const [showApplicants, setShowApplicants] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(null);
+  const unreadCount = useUnreadNotifications(user);
 
   const [jobForm, setJobForm] = useState({
-    alumniId: alumniId,
+    alumniId: "",
     title: "",
     company: "",
     description: "",
@@ -40,8 +47,26 @@ function AlumniJobs() {
     skillsRequired: "",
   });
 
-  const loadJobs = async () => {
+  const handleLogout = () => {
+    localStorage.clear();
+    navigate("/login");
+  };
+
+  const getEmptyJobForm = (alumniId) => ({
+    alumniId,
+    title: "",
+    company: "",
+    description: "",
+    location: "",
+    jobType: "Internship",
+    skillsRequired: "",
+  });
+
+  const loadJobs = async (alumniId) => {
     try {
+      const alumniRes = await api.get(`/alumni/${alumniId}`);
+      setAlumni(alumniRes.data);
+
       const allRes = await api.get("/jobs");
       setJobs(allRes.data);
 
@@ -49,12 +74,31 @@ function AlumniJobs() {
       setMyJobs(myRes.data);
     } catch (error) {
       console.log(error);
+      alert("Failed to load jobs");
+    } finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
-    loadJobs();
-  }, []);
+    const storedUser = localStorage.getItem("user");
+
+    if (!storedUser) {
+      navigate("/login");
+      return;
+    }
+
+    const user = JSON.parse(storedUser);
+
+    if (user.role !== "ALUMNI") {
+      navigate("/login");
+      return;
+    }
+
+    setUser(user);
+    setJobForm(getEmptyJobForm(user.profileId));
+    loadJobs(user.profileId);
+  }, [navigate]);
 
   const handleChange = (e) => {
     setJobForm({
@@ -73,17 +117,9 @@ function AlumniJobs() {
 
       setShowForm(false);
 
-      setJobForm({
-        alumniId: alumniId,
-        title: "",
-        company: "",
-        description: "",
-        location: "",
-        jobType: "Internship",
-        skillsRequired: "",
-      });
+      setJobForm(getEmptyJobForm(jobForm.alumniId));
 
-      loadJobs();
+      loadJobs(jobForm.alumniId);
     } catch (error) {
       console.log(error);
       alert("Failed to post job");
@@ -117,6 +153,19 @@ function AlumniJobs() {
     }
   };
 
+  if (loading) {
+    return (
+      <LoadingState
+        title="Loading jobs"
+        subtitle="Loading your posts, applicants and opportunities."
+      />
+    );
+  }
+
+  const alumniName = alumni?.name || "Alumni";
+  const alumniInitials = alumniName.substring(0, 2).toUpperCase();
+  const profileImageUrl = getProfileImageUrl(alumni);
+
   return (
     <div className="alumni-jobs-layout">
       <aside className="aj-sidebar">
@@ -125,15 +174,15 @@ function AlumniJobs() {
         </div>
 
         <nav className="aj-menu">
-          <a>
+          <a onClick={() => navigate("/alumni/dashboard")}>
             <LayoutDashboard size={20} />
             Dashboard
           </a>
-          <a>
+          <a onClick={() => navigate("/alumni/profile")}>
             <User size={20} />
             Profile
           </a>
-          <a>
+          <a onClick={() => navigate("/alumni/mentorships")}>
             <Users size={20} />
             Mentorship
           </a>
@@ -141,11 +190,11 @@ function AlumniJobs() {
             <Briefcase size={20} />
             Jobs / Internships
           </a>
-          <a>
+          <a onClick={() => navigate("/alumni/events")}>
             <CalendarDays size={20} />
             Events
           </a>
-          <a>
+          <a onClick={() => navigate("/forum")}>
             <MessageSquare size={20} />
             Forum
           </a>
@@ -153,7 +202,7 @@ function AlumniJobs() {
             <Bell size={20} />
             Notifications
           </a>
-          <a>
+          <a onClick={handleLogout}>
             <LogOut size={20} />
             Logout
           </a>
@@ -168,21 +217,30 @@ function AlumniJobs() {
           </div>
 
           <div className="aj-top-actions">
-            <button className="aj-icon-btn">
+            <button
+              className="aj-icon-btn"
+              onClick={() => navigate("/notifications")}
+            >
               <Bell size={21} />
-              <span>4</span>
+              {unreadCount > 0 && <span>{unreadCount}</span>}
             </button>
 
             <div className="aj-profile">
-              <div className="aj-avatar">AK</div>
+              <div className="aj-avatar">
+                {profileImageUrl ? (
+                  <img src={profileImageUrl} alt={alumniName} />
+                ) : (
+                  alumniInitials
+                )}
+              </div>
               <div>
-                <h4>Arun Kumar</h4>
+                <h4>{alumniName}</h4>
                 <p>Alumni</p>
               </div>
               <ChevronDown size={18} />
             </div>
 
-            <button className="aj-logout">
+            <button className="aj-logout" onClick={handleLogout}>
               <LogOut size={18} />
               Logout
             </button>
@@ -396,11 +454,11 @@ function AlumniJobs() {
                     <div>
                       <h3>{app.studentName}</h3>
                       <p>
-                        {app.jobTitle} • {app.company}
+                        {app.jobTitle} - {app.company}
                       </p>
                     </div>
 
-                    <span className={`aj-status ${app.status.toLowerCase()}`}>
+                    <span className={`aj-status ${app.status?.toLowerCase()}`}>
                       {app.status}
                     </span>
 

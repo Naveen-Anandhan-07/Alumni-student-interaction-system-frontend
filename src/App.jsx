@@ -23,13 +23,16 @@ import AlumniEvents from "./pages/AlumniEvents";
 import Forum from "./pages/Forum";
 import ForumQuestion from "./pages/ForumQuestion";
 import Notifications from "./pages/Notifications";
+import ErrorBoundary from "./components/ErrorBoundary";
+import LoadingState from "./components/LoadingState";
 
 
 
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
+    <ErrorBoundary>
+      <BrowserRouter>
+        <Routes>
         <Route
           path="/"
           element={<Home />}
@@ -115,9 +118,18 @@ function App() {
           element={<Notifications />}
         />
 
-        
-      </Routes>
-    </BrowserRouter>
+        <Route
+          path="*"
+          element={
+            <LoadingState
+              title="Page not found"
+              subtitle="This route does not match any page in the portal."
+            />
+          }
+        />
+         </Routes>
+       </BrowserRouter>
+     </ErrorBoundary>
   );
 }
 

@@ -19,17 +19,26 @@ import {
   MapPin,
   Eye,
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import api from "../services/api";
+import LoadingState from "../components/LoadingState";
 import "../styles/AlumniEvents.css";
+import { getProfileImageUrl } from "../utils/profileImage";
+import useUnreadNotifications from "../hooks/useUnreadNotifications";
 
 function AlumniEvents() {
+  const navigate = useNavigate();
+  const [alumni, setAlumni] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const [myEvents, setMyEvents] = useState([]);
   const [allEvents, setAllEvents] = useState([]);
   const [image, setImage] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(null);
+  const unreadCount = useUnreadNotifications(user);
 
   const [eventForm, setEventForm] = useState({
-    alumniId: 1,
+    alumniId: "",
     title: "",
     description: "",
     eventType: "Workshop",
@@ -41,21 +50,61 @@ function AlumniEvents() {
     maxSeats: "",
   });
 
-  const loadEvents = async () => {
+  const handleLogout = () => {
+    localStorage.clear();
+    navigate("/login");
+  };
+
+  const getEmptyEventForm = (alumniId) => ({
+    alumniId,
+    title: "",
+    description: "",
+    eventType: "Workshop",
+    eventDate: "",
+    eventTime: "",
+    mode: "Online",
+    venueOrLink: "",
+    requiredSkills: "",
+    maxSeats: "",
+  });
+
+  const loadEvents = async (alumniId) => {
     try {
+      const alumniRes = await api.get(`/alumni/${alumniId}`);
+      setAlumni(alumniRes.data);
+
       const allRes = await api.get("/events");
       setAllEvents(allRes.data);
 
-      const myRes = await api.get(`/events/alumni/${eventForm.alumniId}`);
+      const myRes = await api.get(`/events/alumni/${alumniId}`);
       setMyEvents(myRes.data);
     } catch (error) {
       console.log(error);
+      alert("Failed to load events");
+    } finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
-    loadEvents();
-  }, []);
+    const storedUser = localStorage.getItem("user");
+
+    if (!storedUser) {
+      navigate("/login");
+      return;
+    }
+
+    const user = JSON.parse(storedUser);
+
+    if (user.role !== "ALUMNI") {
+      navigate("/login");
+      return;
+    }
+
+    setUser(user);
+    setEventForm(getEmptyEventForm(user.profileId));
+    loadEvents(user.profileId);
+  }, [navigate]);
 
   const handleChange = (e) => {
     setEventForm({
@@ -94,25 +143,27 @@ function AlumniEvents() {
       setShowForm(false);
       setImage(null);
 
-      setEventForm({
-        alumniId: 1,
-        title: "",
-        description: "",
-        eventType: "Workshop",
-        eventDate: "",
-        eventTime: "",
-        mode: "Online",
-        venueOrLink: "",
-        requiredSkills: "",
-        maxSeats: "",
-      });
+      setEventForm(getEmptyEventForm(eventForm.alumniId));
 
-      loadEvents();
+      loadEvents(eventForm.alumniId);
     } catch (error) {
       console.log(error);
       alert("Failed to post event");
     }
   };
+
+  if (loading) {
+    return (
+      <LoadingState
+        title="Loading events"
+        subtitle="Preparing your posted events and platform events."
+      />
+    );
+  }
+
+  const alumniName = alumni?.name || "Alumni";
+  const alumniInitials = alumniName.substring(0, 2).toUpperCase();
+  const profileImageUrl = getProfileImageUrl(alumni);
 
   return (
     <div className="alumni-events-layout">
@@ -122,19 +173,19 @@ function AlumniEvents() {
         </div>
 
         <nav className="ae-menu">
-          <a>
+          <a onClick={() => navigate("/alumni/dashboard")}>
             <LayoutDashboard size={20} />
             Dashboard
           </a>
-          <a>
+          <a onClick={() => navigate("/alumni/profile")}>
             <User size={20} />
             Profile
           </a>
-          <a>
+          <a onClick={() => navigate("/alumni/mentorships")}>
             <Users size={20} />
             Mentorship
           </a>
-          <a>
+          <a onClick={() => navigate("/alumni/jobs")}>
             <Briefcase size={20} />
             Jobs / Internships
           </a>
@@ -142,7 +193,7 @@ function AlumniEvents() {
             <CalendarDays size={20} />
             Events
           </a>
-          <a>
+          <a onClick={() => navigate("/forum")}>
             <MessageSquare size={20} />
             Forum
           </a>
@@ -150,7 +201,7 @@ function AlumniEvents() {
             <Bell size={20} />
             Notifications
           </a>
-          <a>
+          <a onClick={handleLogout}>
             <LogOut size={20} />
             Logout
           </a>
@@ -165,21 +216,30 @@ function AlumniEvents() {
           </div>
 
           <div className="ae-top-actions">
-            <button className="ae-icon-btn">
+            <button
+              className="ae-icon-btn"
+              onClick={() => navigate("/notifications")}
+            >
               <Bell size={21} />
-              <span>4</span>
+              {unreadCount > 0 && <span>{unreadCount}</span>}
             </button>
 
             <div className="ae-profile">
-              <div className="ae-avatar">AK</div>
+              <div className="ae-avatar">
+                {profileImageUrl ? (
+                  <img src={profileImageUrl} alt={alumniName} />
+                ) : (
+                  alumniInitials
+                )}
+              </div>
               <div>
-                <h4>Arun Kumar</h4>
+                <h4>{alumniName}</h4>
                 <p>Alumni</p>
               </div>
               <ChevronDown size={18} />
             </div>
 
-            <button className="ae-logout">
+            <button className="ae-logout" onClick={handleLogout}>
               <LogOut size={18} />
               Logout
             </button>
@@ -247,6 +307,7 @@ function AlumniEvents() {
                   key={event.id}
                   own
                   title={event.title}
+                  description={event.description}
                   category={event.eventType}
                   mode={event.mode}
                   date={event.eventDate}
@@ -278,6 +339,7 @@ function AlumniEvents() {
                 <EventCard
                   key={event.id}
                   title={event.title}
+                  description={event.description}
                   category={event.eventType}
                   mode={event.mode}
                   date={event.eventDate}
@@ -438,6 +500,7 @@ function AlumniEvents() {
 
 function EventCard({
   title,
+  description,
   category,
   mode,
   date,
@@ -472,8 +535,7 @@ function EventCard({
         </div>
 
         <p className="ae-event-desc">
-          Alumni-led session designed to support students with practical career
-          guidance and industry exposure.
+          {description || "No description provided."}
         </p>
 
         <div className="ae-event-meta">

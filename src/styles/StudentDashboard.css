@@ -27,6 +27,21 @@ body {
   color: white;
   position: sticky;
   top: 0;
+  align-self: start;
+  height: 100vh;
+  overflow-y: auto;
+  z-index: 20;
+}
+
+.sd-avatar,
+.sd-avatar img {
+  overflow: hidden;
+}
+
+.sd-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .sd-logo {
@@ -434,30 +449,26 @@ body {
   cursor: pointer;
 }
 
-/* APPLIED JOBS TABLE */
+/* APPLIED JOBS */
 
-.sd-table-head,
 .sd-table-row {
+  min-height: 82px;
+  padding: 16px;
+  margin-bottom: 14px;
+  border: 1px solid #ece7f6;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #ffffff 0%, #fbfaff 100%);
+  box-shadow: 0 12px 28px rgba(23, 5, 63, 0.05);
   display: grid;
-  grid-template-columns: 1.4fr 1.6fr 1fr 1fr 1fr;
+  grid-template-columns: minmax(0, 1fr) auto auto;
   align-items: center;
+  gap: 16px;
+  transition: 0.25s ease;
 }
 
-.sd-table-head {
-  padding: 12px 0;
-  color: #74708a;
-  font-size: 13px;
-  border-bottom: 1px solid #ece7f6;
-}
-
-.sd-table-row {
-  min-height: 66px;
-  border-bottom: 1px solid #ece7f6;
-  font-size: 14px;
-}
-
-.sd-table-row:last-child {
-  border-bottom: none;
+.sd-table-row:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 18px 38px rgba(23, 5, 63, 0.09);
 }
 
 .company-cell {
@@ -467,25 +478,39 @@ body {
 }
 
 .company-logo {
-  width: 42px;
-  height: 42px;
-  border-radius: 12px;
+  width: 50px;
+  height: 50px;
+  border-radius: 15px;
   display: grid;
   place-items: center;
   background: #ede7ff;
   color: #4b1fb8;
   font-weight: 800;
+  flex-shrink: 0;
+}
+
+.company-cell strong {
+  display: block;
+  color: #17132f;
+  font-size: 15px;
+}
+
+.company-cell p {
+  margin: 4px 0 0;
+  color: #74708a;
+  font-size: 13px;
 }
 
 .status-pill {
   width: fit-content;
-  padding: 6px 11px;
-  border-radius: 8px;
-  font-size: 13px;
-  font-weight: 700;
+  padding: 7px 12px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
 }
 
-.status-pill.review {
+.status-pill.under-review {
   background: #ede7ff;
   color: #4b1fb8;
 }
@@ -500,16 +525,30 @@ body {
   color: #078245;
 }
 
+.status-pill.rejected {
+  background: #ffe8e8;
+  color: #c63838;
+}
+
+.status-pill.cancelled {
+  background: #eeeeee;
+  color: #707070;
+}
+
 .cancel-btn {
   width: fit-content;
-  height: 36px;
-  padding: 0 14px;
-  border-radius: 10px;
-  border: 1px solid #d5c8ff;
+  height: 38px;
+  padding: 0 15px;
+  border-radius: 11px;
+  border: 1px solid #ffd2d2;
   background: white;
-  color: #4b1fb8;
-  font-weight: 700;
+  color: #c63838;
+  font-weight: 800;
   cursor: pointer;
+}
+
+.cancel-btn:hover {
+  background: #fff5f5;
 }
 
 .dash-symbol {

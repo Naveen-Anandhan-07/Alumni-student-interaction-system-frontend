@@ -19,14 +19,15 @@ import {
   User,
 } from "lucide-react";
 import api from "../services/api";
+import LoadingState from "../components/LoadingState";
 import "../styles/StudentEvents.css";
 
 function StudentEvents() {
   const navigate = useNavigate();
   const [allEvents, setAllEvents] = useState([]);
   const [recommendedEvents, setRecommendedEvents] = useState([]);
-
-  const studentId = 1;
+  const [loading, setLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState("");
 
   const handleLogout = () => {
     localStorage.clear();
@@ -34,8 +35,10 @@ function StudentEvents() {
     navigate("/login");
   };
 
-  const loadEvents = async () => {
+  const loadEvents = async (studentId) => {
     try {
+      setErrorMessage("");
+
       const allRes = await api.get("/events");
       setAllEvents(allRes.data);
 
@@ -43,19 +46,37 @@ function StudentEvents() {
       setRecommendedEvents(recommendedRes.data);
     } catch (error) {
       console.log(error);
+      setErrorMessage("Failed to load events. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    loadEvents();
-  }, []);
+    const storedUser = localStorage.getItem("user");
+
+    if (!storedUser) {
+      navigate("/login");
+      return;
+    }
+
+    const user = JSON.parse(storedUser);
+
+    if (user.role !== "STUDENT") {
+      navigate("/login");
+      return;
+    }
+
+    loadEvents(user.profileId);
+  }, [navigate]);
 
   const handleRegister = async (eventId) => {
     try {
-      await api.post(`/events/${eventId}/register/${studentId}`);
+      const user = JSON.parse(localStorage.getItem("user"));
+
+      await api.post(`/events/${eventId}/register/${user.profileId}`);
       alert("Event registered successfully");
-      loadEvents();
+      loadEvents(user.profileId);
     } catch (error) {
       console.log(error);
 
@@ -66,6 +87,15 @@ function StudentEvents() {
       }
     }
   };
+
+  if (loading) {
+    return (
+      <LoadingState
+        title="Loading events"
+        subtitle="Finding alumni events and recommendations for you."
+      />
+    );
+  }
 
   return (
     <div className="student-events-layout">
@@ -83,7 +113,7 @@ function StudentEvents() {
             <User size={20} />
             Profile
           </a>
-          <a>
+          <a onClick={() => navigate("/student/mentorships")}>
             <Users size={20} />
             Mentorship
           </a>
@@ -138,6 +168,8 @@ function StudentEvents() {
             </select>
           </div>
         </section>
+
+        {errorMessage && <div className="event-empty">{errorMessage}</div>}
 
         <section className="events-section recommended-section">
           <div className="section-heading">

@@ -25,6 +25,21 @@ body {
   color: white;
   position: sticky;
   top: 0;
+  align-self: start;
+  height: 100vh;
+  overflow-y: auto;
+  z-index: 20;
+}
+
+.sm-avatar,
+.sm-avatar img {
+  overflow: hidden;
+}
+
+.sm-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .sm-logo {
@@ -431,6 +446,57 @@ body {
 
 .sm-requested-btn {
   background: #078245;
+}
+
+.sm-message-composer {
+  clear: both;
+  display: grid;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.sm-message-composer label {
+  color: #17053f;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.sm-message-composer textarea {
+  width: 100%;
+  min-height: 108px;
+  margin-top: 8px;
+  border: 1px solid #d9d0ec;
+  border-radius: 13px;
+  background: #faf9ff;
+  color: #17132f;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.6;
+  outline: none;
+  padding: 12px 14px;
+  resize: vertical;
+}
+
+.sm-message-composer textarea:focus {
+  border-color: #4b1fb8;
+  box-shadow: 0 0 0 3px rgba(75, 31, 184, 0.12);
+}
+
+.sm-message-actions {
+  display: grid;
+  grid-template-columns: 0.7fr 1fr;
+  gap: 10px;
+}
+
+.sm-cancel-btn {
+  height: 42px;
+  border: 1px solid #d5c8ff;
+  border-radius: 12px;
+  background: #ffffff;
+  color: #4b1fb8;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
 }
 
 .sm-empty {
