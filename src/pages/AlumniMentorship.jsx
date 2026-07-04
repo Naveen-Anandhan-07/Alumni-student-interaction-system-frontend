@@ -91,6 +91,7 @@ function AlumniMentorship() {
 
   const handleLogout = () => {
     localStorage.clear();
+    window.dispatchEvent(new Event("auth-changed"));
     navigate("/login");
   };
 

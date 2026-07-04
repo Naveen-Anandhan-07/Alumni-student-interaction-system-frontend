@@ -36,8 +36,10 @@ const handleSignup = async (e) => {
 
   try {
     const res = await api.post("/auth/signup", requestData);
+    localStorage.setItem("token", res.data.token);
 
     localStorage.setItem("user", JSON.stringify(res.data));
+    window.dispatchEvent(new Event("auth-changed"));
 
     if (res.data.role === "STUDENT") {
       navigate("/student/dashboard");

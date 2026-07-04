@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import api from "../services/api";
 import "../styles/AlumniDashboard.css";
+import MessageInbox from "../components/MessageInbox";
 
 function AlumniDashboard() {
   const navigate = useNavigate();
@@ -70,6 +71,7 @@ function AlumniDashboard() {
 
   const handleLogout = () => {
     localStorage.clear();
+    window.dispatchEvent(new Event("auth-changed"));
     navigate("/login");
   };
 
@@ -373,6 +375,7 @@ function AlumniDashboard() {
             </div>
           </div>
         </section>
+        <MessageInbox />
 
         <section className="ad-section-card">
           <div className="ad-section-head">

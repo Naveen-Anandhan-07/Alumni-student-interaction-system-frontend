@@ -99,7 +99,7 @@ function StudentJobs() {
             <Bell size={20} />
             Notifications
           </a>
-          <a onClick={() => { localStorage.clear(); navigate("/login");}}>
+          <a onClick={() => { localStorage.clear(); window.dispatchEvent(new Event("auth-changed")); navigate("/login");}}>
             <LogOut size={20} />
             Logout
           </a>

@@ -139,6 +139,7 @@ function StudentMentorship() {
           <a
             onClick={() => {
               localStorage.clear();
+              window.dispatchEvent(new Event("auth-changed"));
               navigate("/login");
             }}
           >
@@ -176,6 +177,7 @@ function StudentMentorship() {
               className="sm-logout"
               onClick={() => {
                 localStorage.clear();
+                window.dispatchEvent(new Event("auth-changed"));
                 navigate("/login");
               }}
             >
@@ -197,13 +199,32 @@ function StudentMentorship() {
 
           <div className="sm-request-box">
             <p>Current Status</p>
+
             <strong>
               {hasAcceptedMentor
                 ? "Mentor Assigned"
                 : hasAnyPendingRequest
-                ? "Request Pending"
-                : "No Request"}
+                  ? "Request Pending"
+                  : "No Request"}
             </strong>
+
+            {acceptedMentorship && (
+              <button
+                type="button"
+                onClick={() => navigate("/student/messages")}
+                style={{
+                  marginTop: "12px",
+                  padding: "10px 16px",
+                  border: "none",
+                  borderRadius: "8px",
+                  background: "#5425c7",
+                  color: "white",
+                  cursor: "pointer",
+                }}
+              >
+                Message My Mentor
+              </button>
+            )}
           </div>
         </section>
 

@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import api from "../services/api";
 import "../styles/StudentDashboard.css";
+import MessageInbox from "../components/MessageInbox";
 
 function StudentDashboard() {
   const navigate = useNavigate();
@@ -73,6 +74,7 @@ function StudentDashboard() {
 
   const handleLogout = () => {
     localStorage.clear();
+    window.dispatchEvent(new Event("auth-changed"));
     navigate("/login");
   };
 
@@ -350,6 +352,7 @@ function StudentDashboard() {
             </div>
           </div>
         </section>
+        <MessageInbox />
 
         <section className="sd-section-card">
           <div className="sd-section-head">

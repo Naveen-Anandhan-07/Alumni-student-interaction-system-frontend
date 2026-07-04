@@ -24,6 +24,8 @@ import Forum from "./pages/Forum";
 import ForumQuestion from "./pages/ForumQuestion";
 import Notifications from "./pages/Notifications";
 
+
+
 function App() {
   return (
     <BrowserRouter>
@@ -112,6 +114,8 @@ function App() {
           path="/notifications"
           element={<Notifications />}
         />
+
+        
       </Routes>
     </BrowserRouter>
   );
