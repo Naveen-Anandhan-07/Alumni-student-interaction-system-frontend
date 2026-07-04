@@ -5,10 +5,13 @@ import {
   BookOpen,
   Briefcase,
   CalendarDays,
+  GraduationCap,
   LayoutDashboard,
+  Link2,
   LogOut,
   MessageSquare,
   Plus,
+  Tag,
   User,
   Users,
   X,
@@ -36,11 +39,14 @@ function StudentProfile() {
   const [selectedImage, setSelectedImage] = useState(null);
   const [previewImage, setPreviewImage] = useState(null);
   const [skillInput, setSkillInput] = useState("");
+  const [selectedResume, setSelectedResume] = useState(null);
   const [form, setForm] = useState({
     name: "",
     department: "",
     year: "",
     role: "Student",
+    githubLink: "",
+    linkedinLink: "",
     skills: [],
   });
 
@@ -68,6 +74,35 @@ function StudentProfile() {
     loadProfile(profileId);
   }, [navigate, studentId]);
 
+  const handleResumeChange = (e) => {
+  setSelectedResume(e.target.files[0]);
+};
+
+const uploadResume = async () => {
+  if (!selectedResume) {
+    alert("Please select a resume PDF");
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append("resume", selectedResume);
+
+  try {
+    const res = await api.post(`/students/${student.id}/resume`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+
+    setStudent(res.data);
+    setSelectedResume(null);
+    alert("Resume uploaded successfully");
+  } catch (error) {
+    console.log(error);
+    alert("Resume upload failed");
+  }
+};
+
   const loadProfile = async (profileId) => {
     try {
       const profileResponse = await api.get(`/students/${profileId}`);
@@ -79,6 +114,8 @@ function StudentProfile() {
         department: profile.department || "",
         year: profile.year || "",
         role: profile.role || "Student",
+        githubLink: profile.githubLink || "",
+        linkedinLink: profile.linkedinLink || "",
         skills: splitSkills(profile.skills),
       });
     } catch (error) {
@@ -127,6 +164,8 @@ function StudentProfile() {
         department: form.department,
         year: form.year,
         role: form.role,
+        githubLink: form.githubLink,
+        linkedinLink: form.linkedinLink,
         skills: form.skills.join(", "),
       };
 
@@ -139,6 +178,8 @@ function StudentProfile() {
         department: updatedStudent.department || "",
         year: updatedStudent.year || "",
         role: updatedStudent.role || "Student",
+        githubLink: updatedStudent.githubLink || "",
+        linkedinLink: updatedStudent.linkedinLink || "",
         skills: splitSkills(updatedStudent.skills),
       });
 
@@ -225,231 +266,469 @@ function StudentProfile() {
   const hasProfileImage = Boolean(getProfileImagePath(student));
 
   return (
-    <div className="student-profile-layout">
-      <aside className="pf-sidebar">
-        <div className="pf-logo">
-          <BookOpen size={34} />
+  <div className="student-profile-layout">
+    {/* SIDEBAR */}
+    <aside className="pf-sidebar">
+      <div className="pf-logo">
+        <BookOpen size={34} />
+      </div>
+
+      <nav className="pf-menu">
+        <a
+          onClick={() =>
+            navigate(
+              isAlumni ? "/alumni/dashboard" : "/student/dashboard"
+            )
+          }
+        >
+          <LayoutDashboard size={20} />
+          Dashboard
+        </a>
+
+        {!isAlumni && (
+          <a className="active">
+            <User size={20} />
+            Profile
+          </a>
+        )}
+
+        <a
+          onClick={() =>
+            navigate(
+              isAlumni
+                ? "/alumni/mentorships"
+                : "/student/mentorships"
+            )
+          }
+        >
+          <Users size={20} />
+          Mentorship
+        </a>
+
+        <a
+          onClick={() =>
+            navigate(
+              isAlumni ? "/alumni/jobs" : "/student/jobs"
+            )
+          }
+        >
+          <Briefcase size={20} />
+          Jobs / Internships
+        </a>
+
+        <a
+          onClick={() =>
+            navigate(
+              isAlumni ? "/alumni/events" : "/student/events"
+            )
+          }
+        >
+          <CalendarDays size={20} />
+          Events
+        </a>
+
+        <a onClick={() => navigate("/forum")}>
+          <MessageSquare size={20} />
+          Forum
+        </a>
+
+        <a onClick={() => navigate("/notifications")}>
+          <Bell size={20} />
+          Notifications
+        </a>
+
+        <a onClick={handleLogout}>
+          <LogOut size={20} />
+          Logout
+        </a>
+      </nav>
+    </aside>
+
+    {/* MAIN CONTENT */}
+    <main className="pf-main">
+      {/* PAGE HEADER */}
+      <section className="pf-page-head compact">
+        <div>
+          <p>
+            {isAlumni ? "Mentorship / Student Profile" : "My Profile"}
+          </p>
+
+          <h1>
+            {isAlumni
+              ? `${student.name}'s Profile`
+              : "Profile & Career Portfolio"}
+          </h1>
+
+          <span>
+            {isAlumni
+              ? "Review the student's academic background, skills, resume and professional links."
+              : "Keep your academic profile and career portfolio updated for alumni mentors."}
+          </span>
         </div>
 
-        <nav className="pf-menu">
-          <a
-            onClick={() =>
-              navigate(isAlumni ? "/alumni/dashboard" : "/student/dashboard")
-            }
+        {isAlumni && (
+          <button
+            type="button"
+            className="pf-back-btn"
+            onClick={() => navigate("/alumni/mentorships")}
           >
-            <LayoutDashboard size={20} />
-            Dashboard
-          </a>
+            Back to Mentorships
+          </button>
+        )}
+      </section>
 
-          {!isAlumni && (
-            <a className="active">
-              <User size={20} />
-              Profile
-            </a>
-          )}
-
-          <a
-            onClick={() =>
-              navigate(isAlumni ? "/alumni/mentorships" : "/student/mentorships")
-            }
-          >
-            <Users size={20} />
-            Mentorship
-          </a>
-
-          <a onClick={() => navigate(isAlumni ? "/alumni/jobs" : "/student/jobs")}>
-            <Briefcase size={20} />
-            Jobs / Internships
-          </a>
-
-          <a
-            onClick={() => navigate(isAlumni ? "/alumni/events" : "/student/events")}
-          >
-            <CalendarDays size={20} />
-            Events
-          </a>
-
-          <a onClick={() => navigate("/forum")}>
-            <MessageSquare size={20} />
-            Forum
-          </a>
-
-          <a onClick={() => navigate("/notifications")}>
-            <Bell size={20} />
-            Notifications
-          </a>
-
-          <a onClick={handleLogout}>
-            <LogOut size={20} />
-            Logout
-          </a>
-        </nav>
-      </aside>
-
-      <main className="pf-main">
-        <section className="pf-page-head compact">
-          <div>
-            <p>{isAlumni ? "Mentee Profile" : "Profile Settings"}</p>
-            <h1>{student.name}</h1>
-            <span>
-              {isAlumni
-                ? "Review this student's academic details and skills."
-                : "Manage your photo, personal details, academic info and skills."}
-            </span>
-          </div>
-
-          <div className="pf-head-avatar image-avatar">
+      {/* PROFILE CONTENT */}
+      <section className="pf-editor-grid refined">
+        {/* LEFT PROFILE SUMMARY */}
+        <div className="pf-profile-card pf-photo-card">
+          <div className="pf-avatar-large image-avatar">
             {profileImageUrl ? (
               <img src={profileImageUrl} alt={student.name} />
             ) : (
               firstLetter
             )}
           </div>
-        </section>
 
-        {isAlumni && (
-          <button
-            className="pf-logout"
-            onClick={() => navigate("/alumni/mentorships")}
-          >
-            Back to Mentorships
-          </button>
-        )}
+          <h2>{student.name}</h2>
+          <p>{student.email}</p>
 
-        <section className="pf-editor-grid">
-          <div className="pf-profile-card pf-photo-card">
-            <div className="pf-avatar-large image-avatar">
-              {profileImageUrl ? (
-                <img src={profileImageUrl} alt="Profile" />
-              ) : (
-                firstLetter
-              )}
+          {!isAlumni && (
+            <div className="pf-upload-box">
+              <input
+                id="student-profile-image"
+                name="studentProfileImage"
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
+              />
+
+              {selectedImage ? (
+                <button
+                  type="button"
+                  onClick={uploadProfileImage}
+                >
+                  Save New Photo
+                </button>
+              ) : hasProfileImage ? (
+                <button
+                  type="button"
+                  className="danger"
+                  onClick={removeProfileImage}
+                >
+                  Remove Photo
+                </button>
+              ) : null}
+            </div>
+          )}
+
+          <div className="pf-divider"></div>
+
+          <div className="pf-mini-info">
+            <div>
+              <BookOpen size={18} />
+              <span>Department</span>
+              <strong>
+                {student.department || "Not provided"}
+              </strong>
             </div>
 
-            <h2>{student.name}</h2>
-            <p>{student.email}</p>
+            <div>
+              <GraduationCap size={18} />
+              <span>Year</span>
+              <strong>
+                {student.year
+                  ? `Year ${student.year}`
+                  : "Not provided"}
+              </strong>
+            </div>
 
-            {!isAlumni && (
-              <div className="pf-upload-box">
-                <input type="file" accept="image/*" onChange={handleImageChange} />
+            <div>
+              <Tag size={18} />
+              <span>Profile Type</span>
+              <strong>Student</strong>
+            </div>
+          </div>
+        </div>
 
-                {selectedImage ? (
-                  <button onClick={uploadProfileImage}>Save Photo</button>
-                ) : hasProfileImage ? (
-                  <button className="danger" onClick={removeProfileImage}>
-                    Remove Photo
-                  </button>
-                ) : (
-                  <button onClick={uploadProfileImage}>Upload Photo</button>
-                )}
-              </div>
+        {/* EDITABLE PROFILE DETAILS */}
+        <form
+          className="pf-section-card pf-edit-card"
+          onSubmit={saveProfile}
+        >
+          <div className="pf-section-head">
+            <div>
+              <h2>Academic Details</h2>
+              <p>
+                {isAlumni
+                  ? "Student academic information."
+                  : "Update the details shown across the portal."}
+              </p>
+            </div>
+          </div>
+
+          <div className="pf-form-grid">
+            <label>
+              Full Name
+              <input
+                id="student-name"
+                name="name"
+                value={form.name}
+                onChange={handleChange}
+                disabled={isAlumni}
+                required
+              />
+            </label>
+
+            <label>
+              Email Address
+              <input
+                id="student-email"
+                name="email"
+                value={student.email || ""}
+                disabled
+              />
+            </label>
+
+            <label>
+              Department
+              <input
+                id="student-department"
+                name="department"
+                value={form.department}
+                onChange={handleChange}
+                disabled={isAlumni}
+                placeholder="Example: Computer Science"
+              />
+            </label>
+
+            <label>
+              Current Year
+              <input
+                id="student-year"
+                name="year"
+                type="number"
+                min="1"
+                max="6"
+                value={form.year}
+                onChange={handleChange}
+                disabled={isAlumni}
+                placeholder="Example: 3"
+              />
+            </label>
+
+            <label>
+              GitHub Profile
+              <input
+                id="student-github"
+                name="githubLink"
+                type="url"
+                value={form.githubLink}
+                onChange={handleChange}
+                disabled={isAlumni}
+                placeholder="https://github.com/username"
+              />
+            </label>
+
+            <label>
+              LinkedIn Profile
+              <input
+                id="student-linkedin"
+                name="linkedinLink"
+                type="url"
+                value={form.linkedinLink}
+                onChange={handleChange}
+                disabled={isAlumni}
+                placeholder="https://linkedin.com/in/username"
+              />
+            </label>
+          </div>
+
+          {!isAlumni && (
+            <div className="pf-form-actions">
+              <button type="submit">
+                Save Academic Details
+              </button>
+            </div>
+          )}
+        </form>
+
+        {/* CAREER PORTFOLIO */}
+        <div className="pf-section-card pf-career-card">
+          <div className="pf-section-head">
+            <div>
+              <h2>Career Portfolio</h2>
+              <p>
+                Resume and professional profiles for mentorship
+                review.
+              </p>
+            </div>
+          </div>
+
+          {/* RESUME */}
+          <div className="pf-career-item">
+            <div className="pf-career-item-info">
+              <strong>Resume</strong>
+
+              <span>
+                {student.resumePdf
+                  ? "Resume PDF available"
+                  : "No resume uploaded yet"}
+              </span>
+            </div>
+
+            <div className="pf-career-actions">
+              {student.resumePdf && (
+                <a
+                  href={`http://localhost:8080${student.resumePdf}`}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  View Resume
+                </a>
+              )}
+            </div>
+          </div>
+
+          {!isAlumni && (
+            <div className="pf-resume-upload">
+              <input
+                id="student-resume"
+                name="studentResume"
+                type="file"
+                accept="application/pdf"
+                onChange={handleResumeChange}
+              />
+
+              <button
+                type="button"
+                onClick={uploadResume}
+                disabled={!selectedResume}
+              >
+                {student.resumePdf
+                  ? "Replace Resume"
+                  : "Upload Resume"}
+              </button>
+            </div>
+          )}
+
+          {/* GITHUB */}
+          <div className="pf-career-item">
+            <div className="pf-career-item-info">
+              <strong>
+                <Link2 size={17} />
+                GitHub
+              </strong>
+
+              <span>
+                {student.githubLink
+                  ? "Developer profile connected"
+                  : "GitHub profile not added"}
+              </span>
+            </div>
+
+            {student.githubLink && (
+              <a
+                href={student.githubLink}
+                target="_blank"
+                rel="noreferrer"
+              >
+                Open Profile
+              </a>
             )}
           </div>
 
-          <form className="pf-section-card pf-edit-card" onSubmit={saveProfile}>
-            <div className="pf-section-head">
-              <h2>Profile Details</h2>
-              <p>Edit the information shown across the portal.</p>
+          {/* LINKEDIN */}
+          <div className="pf-career-item">
+            <div className="pf-career-item-info">
+              <strong>
+                <Link2 size={17} />
+                LinkedIn
+              </strong>
+
+              <span>
+                {student.linkedinLink
+                  ? "Professional profile connected"
+                  : "LinkedIn profile not added"}
+              </span>
             </div>
 
-            <div className="pf-form-grid">
-              <label>
-                Name
-                <input
-                  name="name"
-                  value={form.name}
-                  onChange={handleChange}
-                  disabled={isAlumni}
-                  required
-                />
-              </label>
-
-              <label>
-                Department
-                <input
-                  name="department"
-                  value={form.department}
-                  onChange={handleChange}
-                  disabled={isAlumni}
-                  placeholder="Example: Computer Science"
-                />
-              </label>
-
-              <label>
-                Year
-                <input
-                  name="year"
-                  value={form.year}
-                  onChange={handleChange}
-                  disabled={isAlumni}
-                  placeholder="Example: 3"
-                />
-              </label>
-
-              <label>
-                Role
-                <input
-                  name="role"
-                  value={form.role}
-                  onChange={handleChange}
-                  disabled={isAlumni}
-                  placeholder="Example: Student"
-                />
-              </label>
-            </div>
-
-            <div className="pf-skills-editor">
-              <label>
-                Skills
-                {!isAlumni && (
-                  <div className="pf-skill-input">
-                    <input
-                      value={skillInput}
-                      onChange={(e) => setSkillInput(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") {
-                          e.preventDefault();
-                          addSkill();
-                        }
-                      }}
-                      placeholder="Add a skill"
-                    />
-                    <button type="button" onClick={addSkill}>
-                      <Plus size={16} />
-                      Add
-                    </button>
-                  </div>
-                )}
-              </label>
-
-              <div className="pf-skills">
-                {form.skills.length === 0 ? (
-                  <span>No skills added</span>
-                ) : (
-                  form.skills.map((skill) => (
-                    <span key={skill}>
-                      {skill}
-                      {!isAlumni && (
-                        <button type="button" onClick={() => removeSkill(skill)}>
-                          <X size={13} />
-                        </button>
-                      )}
-                    </span>
-                  ))
-                )}
-              </div>
-            </div>
-
-            {!isAlumni && (
-              <div className="pf-form-actions">
-                <button type="submit">Save Profile</button>
-              </div>
+            {student.linkedinLink && (
+              <a
+                href={student.linkedinLink}
+                target="_blank"
+                rel="noreferrer"
+              >
+                Open Profile
+              </a>
             )}
-          </form>
-        </section>
-      </main>
-    </div>
-  );
+          </div>
+        </div>
+
+        {/* SKILLS */}
+        <div className="pf-section-card pf-skills-card">
+          <div className="pf-section-head">
+            <div>
+              <h2>Skills & Interests</h2>
+              <p>
+                Technologies, tools and professional interests.
+              </p>
+            </div>
+          </div>
+
+          {!isAlumni && (
+            <div className="pf-skill-input">
+              <input
+                id="student-skill"
+                name="skillInput"
+                value={skillInput}
+                onChange={(e) =>
+                  setSkillInput(e.target.value)
+                }
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    addSkill();
+                  }
+                }}
+                placeholder="Example: React"
+              />
+
+              <button
+                type="button"
+                onClick={addSkill}
+              >
+                <Plus size={16} />
+                Add Skill
+              </button>
+            </div>
+          )}
+
+          <div className="pf-skills">
+            {form.skills.length === 0 ? (
+              <span>No skills added yet</span>
+            ) : (
+              form.skills.map((skill) => (
+                <span key={skill}>
+                  {skill}
+
+                  {!isAlumni && (
+                    <button
+                      type="button"
+                      aria-label={`Remove ${skill}`}
+                      onClick={() => removeSkill(skill)}
+                    >
+                      <X size={13} />
+                    </button>
+                  )}
+                </span>
+              ))
+            )}
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+);
 }
 
 export default StudentProfile;

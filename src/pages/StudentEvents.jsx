@@ -112,7 +112,7 @@ function StudentEvents() {
             <User size={20} />
             Profile
           </a>
-          <a>
+          <a onClick={() => navigate("/student/mentorships")}>
             <Users size={20} />
             Mentorship
           </a>

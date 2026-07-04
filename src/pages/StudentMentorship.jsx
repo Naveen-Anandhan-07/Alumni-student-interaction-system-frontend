@@ -30,6 +30,8 @@ function StudentMentorship() {
   const [alumniList, setAlumniList] = useState([]);
   const [mentorships, setMentorships] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [activeRequestAlumniId, setActiveRequestAlumniId] = useState(null);
+  const [requestMessage, setRequestMessage] = useState("");
   const unreadCount = useUnreadNotifications(user);
 
   useEffect(() => {
@@ -93,19 +95,38 @@ function StudentMentorship() {
       return;
     }
 
+    const message = requestMessage.trim();
+
+    if (!message) {
+      alert("Please write a short message for your mentorship request.");
+      return;
+    }
+
     try {
       await api.post("/mentorships", {
         studentId: user.profileId,
         alumniId: alumniId,
-        message: "I would like to request you as my mentor.",
+        message,
       });
 
       alert("Mentorship request sent successfully");
+      setActiveRequestAlumniId(null);
+      setRequestMessage("");
       loadData(user.profileId);
     } catch (error) {
       console.log(error);
       alert("Failed to send mentorship request");
     }
+  };
+
+  const startMentorshipRequest = (alumniId) => {
+    setActiveRequestAlumniId(alumniId);
+    setRequestMessage("");
+  };
+
+  const cancelMentorshipRequest = () => {
+    setActiveRequestAlumniId(null);
+    setRequestMessage("");
   };
 
   const isPendingForThisAlumni = (alumniId) => {
@@ -285,7 +306,12 @@ function StudentMentorship() {
                   hasAnyPendingRequest={hasAnyPendingRequest}
                   pendingForThisAlumni={isPendingForThisAlumni(alumni.id)}
                   acceptedForThisAlumni={isAcceptedForThisAlumni(alumni.id)}
-                  onRequest={sendMentorshipRequest}
+                  isWritingRequest={activeRequestAlumniId === alumni.id}
+                  requestMessage={requestMessage}
+                  onMessageChange={setRequestMessage}
+                  onStartRequest={startMentorshipRequest}
+                  onSendRequest={sendMentorshipRequest}
+                  onCancelRequest={cancelMentorshipRequest}
                 />
               ))
             )}
@@ -302,7 +328,12 @@ function AlumniCard({
   hasAnyPendingRequest,
   pendingForThisAlumni,
   acceptedForThisAlumni,
-  onRequest,
+  isWritingRequest,
+  requestMessage,
+  onMessageChange,
+  onStartRequest,
+  onSendRequest,
+  onCancelRequest,
 }) {
   const disabled =
     hasAcceptedMentor || hasAnyPendingRequest;
@@ -355,22 +386,56 @@ function AlumniCard({
           )}
         </div>
 
-        <button
-          className={
-            pendingForThisAlumni || acceptedForThisAlumni
-              ? "sm-requested-btn"
-              : "sm-request-btn"
-          }
-          disabled={disabled}
-          onClick={() => onRequest(alumni.id)}
-        >
-          {pendingForThisAlumni || acceptedForThisAlumni ? (
-            <CheckCircle size={17} />
-          ) : (
-            <Send size={17} />
-          )}
-          {buttonText}
-        </button>
+        {isWritingRequest ? (
+          <div className="sm-message-composer">
+            <label>
+              Message to alumni
+              <textarea
+                value={requestMessage}
+                onChange={(e) => onMessageChange(e.target.value)}
+                placeholder="Write why you would like guidance from this alumni."
+                rows={4}
+              />
+            </label>
+
+            <div className="sm-message-actions">
+              <button
+                type="button"
+                className="sm-cancel-btn"
+                onClick={onCancelRequest}
+              >
+                Cancel
+              </button>
+
+              <button
+                type="button"
+                className="sm-request-btn"
+                disabled={!requestMessage.trim()}
+                onClick={() => onSendRequest(alumni.id)}
+              >
+                <Send size={17} />
+                Send Request
+              </button>
+            </div>
+          </div>
+        ) : (
+          <button
+            className={
+              pendingForThisAlumni || acceptedForThisAlumni
+                ? "sm-requested-btn"
+                : "sm-request-btn"
+            }
+            disabled={disabled}
+            onClick={() => onStartRequest(alumni.id)}
+          >
+            {pendingForThisAlumni || acceptedForThisAlumni ? (
+              <CheckCircle size={17} />
+            ) : (
+              <Send size={17} />
+            )}
+            {buttonText}
+          </button>
+        )}
       </div>
     </div>
   );
