@@ -238,6 +238,31 @@ body {
   line-height: 1.7;
 }
 
+.pf-back-btn {
+  min-height: 46px;
+  border: 1px solid #d5c8ff;
+  border-radius: 14px;
+  background: #ffffff;
+  color: #4b1fb8;
+  box-shadow: 0 12px 28px rgba(75, 31, 184, 0.1);
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 800;
+  padding: 0 18px;
+  transition: 0.2s ease;
+  white-space: nowrap;
+}
+
+.pf-back-btn:hover,
+.pf-back-btn:focus-visible {
+  background: #4b1fb8;
+  border-color: #4b1fb8;
+  color: #ffffff;
+  outline: none;
+  transform: translateY(-2px);
+  box-shadow: 0 16px 34px rgba(75, 31, 184, 0.24);
+}
+
 .pf-head-avatar {
   width: 130px;
   height: 130px;
@@ -345,6 +370,52 @@ body {
 .pf-status-list strong {
   color: #17053f;
   font-size: 15px;
+}
+
+.pf-mini-info {
+  display: grid;
+  gap: 12px;
+  text-align: left;
+}
+
+.pf-mini-info div {
+  display: grid;
+  grid-template-columns: 34px 1fr;
+  grid-template-areas:
+    "icon label"
+    "icon value";
+  column-gap: 12px;
+  align-items: center;
+  padding: 14px;
+  border-radius: 15px;
+  background: #faf9ff;
+  border: 1px solid #ece7f6;
+}
+
+.pf-mini-info svg {
+  grid-area: icon;
+  width: 34px;
+  height: 34px;
+  padding: 8px;
+  border-radius: 12px;
+  background: #ede7ff;
+  color: #4b1fb8;
+}
+
+.pf-mini-info span {
+  grid-area: label;
+  color: #74708a;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.pf-mini-info strong {
+  grid-area: value;
+  margin-top: 2px;
+  color: #17053f;
+  font-size: 14px;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
 }
 
 /* STATS */
@@ -590,6 +661,10 @@ body {
     width: 100%;
   }
 
+  .pf-back-btn {
+    width: 100%;
+  }
+
   .pf-profile-grid,
   .pf-editor-grid,
   .pf-stats-grid,
@@ -655,4 +730,119 @@ body {
   border: 1px solid #ffd2d2;
   background: white;
   color: #c63838;
+}
+
+.pf-editor-grid.refined {
+  display: grid;
+  grid-template-columns: 320px minmax(0, 1fr);
+  grid-template-areas:
+    "photo details"
+    "photo career"
+    "skills skills";
+  gap: 24px;
+  align-items: start;
+}
+
+.pf-photo-card {
+  grid-area: photo;
+  position: static;
+  min-height: auto;
+}
+
+.pf-edit-card {
+  grid-area: details;
+  min-height: auto;
+}
+
+.pf-career-card {
+  grid-area: career;
+}
+
+.pf-skills-card {
+  grid-area: skills;
+}
+
+.pf-career-item {
+  padding: 16px;
+  border-radius: 16px;
+  background: #faf9ff;
+  border: 1px solid #ece7f6;
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.pf-career-item-info {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.pf-career-item-info strong {
+  color: #17053f;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pf-career-item-info strong svg {
+  color: #4b1fb8;
+}
+
+.pf-career-item-info span {
+  color: #74708a;
+  font-size: 13px;
+}
+
+.pf-career-item a,
+.pf-career-actions a {
+  text-decoration: none;
+  color: #4b1fb8;
+  font-weight: 800;
+}
+
+.pf-resume-upload {
+  margin-bottom: 18px;
+  padding: 16px;
+  border-radius: 16px;
+  background: #ffffff;
+  border: 1px dashed #d5c8ff;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.pf-resume-upload button {
+  height: 40px;
+  border: none;
+  border-radius: 12px;
+  background: #4b1fb8;
+  color: white;
+  font-weight: 800;
+  padding: 0 16px;
+  cursor: pointer;
+}
+
+.pf-resume-upload button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+@media (max-width: 1100px) {
+  .pf-editor-grid.refined {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "photo"
+      "details"
+      "career"
+      "skills";
+  }
+
+  .pf-career-item,
+  .pf-resume-upload {
+    flex-direction: column;
+    align-items: stretch;
+  }
 }
