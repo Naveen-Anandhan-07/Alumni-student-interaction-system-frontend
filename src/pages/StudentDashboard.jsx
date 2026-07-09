@@ -19,6 +19,7 @@ import {
 import api from "../services/api";
 import LoadingState from "../components/LoadingState";
 import "../styles/StudentDashboard.css";
+import MessageInbox from "../components/MessageInbox";
 import "../styles/StudentJobs.css";
 import "../styles/StudentEvents.css";
 import { getProfileImageUrl } from "../utils/profileImage";
@@ -100,6 +101,7 @@ function StudentDashboard() {
 
   const handleLogout = () => {
     localStorage.clear();
+    window.dispatchEvent(new Event("auth-changed"));
     navigate("/login");
   };
 
@@ -398,6 +400,7 @@ function StudentDashboard() {
             </div>
           </div>
         </section>
+        <MessageInbox />
 
         <section className="sd-section-card">
           <div className="sd-section-head">

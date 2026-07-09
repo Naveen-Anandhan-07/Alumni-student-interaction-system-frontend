@@ -14,6 +14,7 @@ import {
 import api from "../services/api";
 import LoadingState from "../components/LoadingState";
 import "../styles/AlumniDashboard.css";
+import MessageInbox from "../components/MessageInbox";
 import { getProfileImageUrl } from "../utils/profileImage";
 import useUnreadNotifications from "../hooks/useUnreadNotifications";
 
@@ -142,6 +143,7 @@ function AlumniDashboard() {
 
   const handleLogout = () => {
     localStorage.clear();
+    window.dispatchEvent(new Event("auth-changed"));
     navigate("/login");
   };
 
@@ -470,6 +472,7 @@ function AlumniDashboard() {
             </div>
           </div>
         </section>
+        <MessageInbox />
 
       </main>
     </div>

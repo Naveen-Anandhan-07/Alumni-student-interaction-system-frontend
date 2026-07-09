@@ -73,6 +73,7 @@ function StudentMentorship() {
 
   const handleLogout = () => {
     localStorage.clear();
+    window.dispatchEvent(new Event("auth-changed"));
     navigate("/login");
   };
 
@@ -247,13 +248,15 @@ function StudentMentorship() {
 
           <div className="sm-request-box">
             <p>Current Status</p>
+
             <strong>
               {hasAcceptedMentor
                 ? "Mentor Assigned"
                 : hasAnyPendingRequest
-                ? "Request Pending"
-                : "No Request"}
+                  ? "Request Pending"
+                  : "No Request"}
             </strong>
+
           </div>
         </section>
 

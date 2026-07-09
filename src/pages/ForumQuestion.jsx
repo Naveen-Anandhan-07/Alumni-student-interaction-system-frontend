@@ -123,6 +123,7 @@ function ForumQuestion() {
 
   const handleLogout = () => {
     localStorage.clear();
+    window.dispatchEvent(new Event("auth-changed"));
     navigate("/login");
   };
 
@@ -317,4 +318,3 @@ function ForumQuestion() {
 }
 
 export default ForumQuestion;
-

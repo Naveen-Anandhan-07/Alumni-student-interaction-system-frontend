@@ -26,6 +26,8 @@ import Notifications from "./pages/Notifications";
 import ErrorBoundary from "./components/ErrorBoundary";
 import LoadingState from "./components/LoadingState";
 
+
+
 function App() {
   return (
     <ErrorBoundary>
@@ -125,9 +127,9 @@ function App() {
             />
           }
         />
-        </Routes>
-      </BrowserRouter>
-    </ErrorBoundary>
+         </Routes>
+       </BrowserRouter>
+     </ErrorBoundary>
   );
 }
 
