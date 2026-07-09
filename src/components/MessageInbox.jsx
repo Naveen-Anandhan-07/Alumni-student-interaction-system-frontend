@@ -39,14 +39,6 @@ function MessageInbox() {
   };
 
   useEffect(() => {
-    if (!selectedId && conversations.length > 0) {
-      selectConversation(
-        conversations[0].mentorshipId
-      );
-    }
-  }, [conversations, selectedId]);
-
-  useEffect(() => {
     bottomRef.current?.scrollIntoView({
       behavior: "smooth",
     });

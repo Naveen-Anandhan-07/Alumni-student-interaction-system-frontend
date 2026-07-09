@@ -257,23 +257,6 @@ function StudentMentorship() {
                   : "No Request"}
             </strong>
 
-            {acceptedMentorship && (
-              <button
-                type="button"
-                onClick={() => navigate("/student/messages")}
-                style={{
-                  marginTop: "12px",
-                  padding: "10px 16px",
-                  border: "none",
-                  borderRadius: "8px",
-                  background: "#5425c7",
-                  color: "white",
-                  cursor: "pointer",
-                }}
-              >
-                Message My Mentor
-              </button>
-            )}
           </div>
         </section>
 
