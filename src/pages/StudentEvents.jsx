@@ -308,7 +308,7 @@ function EventCard({
       <div className="event-image-box">
         {imageUrl ? (
           <img
-            src={`http://localhost:8080${imageUrl}`}
+            src={backendAssetUrl(imageUrl)}
             alt={title}
             className="event-img"
           />

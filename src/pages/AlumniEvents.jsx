@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { backendAssetUrl } from "../config/environment";
 import {
   Bell,
   BookOpen,
@@ -551,7 +552,7 @@ function EventCard({
       <div className="ae-event-image">
         {imageUrl ? (
           <img
-            src={`http://localhost:8080${imageUrl}`}
+            src={backendAssetUrl(imageUrl)}
             alt={title}
             className="ae-event-img"
           />

@@ -585,7 +585,7 @@ function DashboardEventCard({ event, onRegister }) {
       <div className="event-image-box">
         {event.imageUrl ? (
           <img
-            src={`http://localhost:8080${event.imageUrl}`}
+            src={backendAssetUrl(event.imageUrl)}
             alt={event.title}
             className="event-img"
           />

@@ -1,4 +1,5 @@
 import { Client } from "@stomp/stompjs";
+import { WEBSOCKET_URL } from "../config/environment";
 
 export function createChatClient({
   onMessage,
@@ -12,7 +13,7 @@ export function createChatClient({
   }
 
   const client = new Client({
-    brokerURL: "ws://localhost:8080/ws",
+    brokerURL: WEBSOCKET_URL,
 
     connectHeaders: {
       Authorization: `Bearer ${token}`,

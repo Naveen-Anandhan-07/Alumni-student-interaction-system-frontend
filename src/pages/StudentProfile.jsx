@@ -589,7 +589,7 @@ const uploadResume = async () => {
             <div className="pf-career-actions">
               {student.resumePdf && (
                 <a
-                  href={`http://localhost:8080${student.resumePdf}`}
+                  href={backendAssetUrla(student.resumePdf)}
                   target="_blank"
                   rel="noreferrer"
                 >

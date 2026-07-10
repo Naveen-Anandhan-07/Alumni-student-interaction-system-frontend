@@ -394,7 +394,7 @@ function AlumniCard({
       <div className="sm-alumni-image">
         {alumni.imageUrl ? (
           <img
-            src={`http://localhost:8080${alumni.imageUrl}`}
+            src={backendasseturl(alumni.imageUrl)}
             alt={alumni.name}
           />
         ) : (

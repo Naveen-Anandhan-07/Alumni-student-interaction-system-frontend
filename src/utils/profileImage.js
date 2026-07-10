@@ -1,4 +1,4 @@
-const API_HOST = "http://localhost:8080";
+import { BACKEND_URL as API_HOST } from "../config/environment";
 
 export const getProfileImagePath = (profile) =>
   profile?.profileImage ||
