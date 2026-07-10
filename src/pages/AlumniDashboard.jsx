@@ -14,8 +14,7 @@ import {
 import api from "../services/api";
 import LoadingState from "../components/LoadingState";
 import "../styles/AlumniDashboard.css";
-import MessageInbox from "../components/MessageInbox";
-import { getProfileImageUrl } from "../utils/profileImage";
+import { getProfileImageUrl, getProfileInitial } from "../utils/profileImage";
 import useUnreadNotifications from "../hooks/useUnreadNotifications";
 
 const normalizeObject = (value) =>
@@ -68,7 +67,7 @@ const toDisplayText = (value, fallback = "Not provided") => {
 };
 
 const getFirstLetter = (value, fallback = "A") =>
-  toDisplayText(value, fallback).charAt(0).toUpperCase();
+  getProfileInitial(toDisplayText(value, fallback), fallback);
 
 function AlumniDashboard() {
   const navigate = useNavigate();
@@ -238,6 +237,11 @@ function AlumniDashboard() {
           <a onClick={() => navigate("/forum")}>
             <MessageSquare size={20} />
             Forum
+          </a>
+
+          <a onClick={() => navigate("/chat")}>
+            <MessageSquare size={20} />
+            Chat
           </a>
 
           <a
@@ -472,7 +476,21 @@ function AlumniDashboard() {
             </div>
           </div>
         </section>
-        <MessageInbox />
+
+        <section className="ad-section-card">
+          <div className="ad-section-head">
+            <h2>Private Chat</h2>
+
+            <button onClick={() => navigate("/chat")}>
+              Open Chat
+            </button>
+          </div>
+
+          <p>
+            Continue mentorship conversations with accepted students on the
+            dedicated chat page.
+          </p>
+        </section>
 
       </main>
     </div>

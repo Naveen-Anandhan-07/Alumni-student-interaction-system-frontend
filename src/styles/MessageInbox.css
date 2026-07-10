@@ -9,10 +9,20 @@
   overflow: hidden;
 }
 
+.message-inbox.page {
+  height: calc(100vh - 310px);
+  min-height: 560px;
+  margin-top: 0;
+}
+
 .message-inbox.empty {
   display: block;
   height: auto;
   padding: 24px;
+}
+
+.message-inbox.empty.page {
+  min-height: 220px;
 }
 
 .message-conversations {

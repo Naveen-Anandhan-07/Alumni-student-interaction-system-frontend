@@ -19,7 +19,11 @@ import {
 import api from "../services/api";
 import LoadingState from "../components/LoadingState";
 import "../styles/Profile.css";
-import { getProfileImagePath, getProfileImageUrl } from "../utils/profileImage";
+import {
+  getProfileImagePath,
+  getProfileImageUrl,
+  getProfileInitial,
+} from "../utils/profileImage";
 
 const splitSkills = (skills) =>
   skills
@@ -262,7 +266,7 @@ const uploadResume = async () => {
   }
 
   const isAlumni = user?.role === "ALUMNI";
-  const firstLetter = student.name ? student.name.charAt(0).toUpperCase() : "S";
+  const firstLetter = getProfileInitial(student.name, "S");
   const profileImageUrl = previewImage || getProfileImageUrl(student);
   const hasProfileImage = Boolean(getProfileImagePath(student));
 
@@ -331,6 +335,11 @@ const uploadResume = async () => {
         <a onClick={() => navigate("/forum")}>
           <MessageSquare size={20} />
           Forum
+        </a>
+
+        <a onClick={() => navigate("/chat")}>
+          <MessageSquare size={20} />
+          Chat
         </a>
 
         <a onClick={() => navigate("/notifications")}>

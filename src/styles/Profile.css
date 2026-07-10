@@ -90,6 +90,7 @@ body {
 .pf-main,
 .profile-main {
   padding: 24px 28px 42px;
+  min-width: 0;
 }
 
 /* TOPBAR */
@@ -214,6 +215,10 @@ body {
   margin-bottom: 24px;
 }
 
+.pf-page-head > div {
+  min-width: 0;
+}
+
 .pf-page-head.compact {
   min-height: 170px;
 }
@@ -228,6 +233,7 @@ body {
   margin: 0;
   color: #17053f;
   font-size: 38px;
+  overflow-wrap: anywhere;
 }
 
 .pf-page-head span {
@@ -286,8 +292,8 @@ body {
 
 .pf-editor-grid {
   display: grid;
-  grid-template-columns: 340px 1fr;
-  gap: 22px;
+  grid-template-columns: minmax(280px, 340px) minmax(0, 1fr);
+  gap: 24px;
   align-items: start;
 }
 
@@ -309,9 +315,9 @@ body {
 
 .pf-photo-card {
   min-height: auto;
-  grid-row: auto;
   position: sticky;
   top: 24px;
+  grid-row: span 2;
 }
 
 .pf-avatar-large {
@@ -459,6 +465,7 @@ body {
 
 .pf-section-card {
   padding: 24px;
+  min-width: 0;
 }
 
 .pf-edit-card {
@@ -714,6 +721,7 @@ body {
 
 .pf-upload-box input {
   font-size: 13px;
+  max-width: 100%;
 }
 
 .pf-upload-box button {
@@ -734,7 +742,7 @@ body {
 
 .pf-editor-grid.refined {
   display: grid;
-  grid-template-columns: 320px minmax(0, 1fr);
+  grid-template-columns: minmax(280px, 320px) minmax(0, 1fr);
   grid-template-areas:
     "photo details"
     "photo career"
@@ -743,22 +751,24 @@ body {
   align-items: start;
 }
 
-.pf-photo-card {
+.pf-editor-grid.refined > .pf-photo-card {
   grid-area: photo;
-  position: static;
+  position: sticky;
+  top: 24px;
+  grid-row: auto;
   min-height: auto;
 }
 
-.pf-edit-card {
+.pf-editor-grid.refined > .pf-edit-card {
   grid-area: details;
   min-height: auto;
 }
 
-.pf-career-card {
+.pf-editor-grid.refined > .pf-career-card {
   grid-area: career;
 }
 
-.pf-skills-card {
+.pf-editor-grid.refined > .pf-skills-card {
   grid-area: skills;
 }
 
@@ -772,12 +782,14 @@ body {
   gap: 16px;
   align-items: center;
   margin-bottom: 12px;
+  min-width: 0;
 }
 
 .pf-career-item-info {
   display: flex;
   flex-direction: column;
   gap: 5px;
+  min-width: 0;
 }
 
 .pf-career-item-info strong {
@@ -794,6 +806,7 @@ body {
 .pf-career-item-info span {
   color: #74708a;
   font-size: 13px;
+  overflow-wrap: anywhere;
 }
 
 .pf-career-item a,
@@ -812,6 +825,12 @@ body {
   display: flex;
   gap: 12px;
   align-items: center;
+  min-width: 0;
+}
+
+.pf-resume-upload input {
+  min-width: 0;
+  width: 100%;
 }
 
 .pf-resume-upload button {
@@ -844,5 +863,11 @@ body {
   .pf-resume-upload {
     flex-direction: column;
     align-items: stretch;
+  }
+
+  .pf-editor-grid > .pf-photo-card,
+  .pf-editor-grid.refined > .pf-photo-card {
+    position: static;
+    grid-row: auto;
   }
 }

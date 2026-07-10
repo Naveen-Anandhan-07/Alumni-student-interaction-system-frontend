@@ -19,6 +19,20 @@ body {
     width: min(1600px, 98%);
     margin: 0 auto;
     padding: 24px 0 60px;
+    position: relative;
+}
+
+.project-version-badge {
+    width: fit-content;
+    margin: 0 0 12px auto;
+    padding: 7px 13px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.86);
+    border: 1px solid rgba(109, 93, 252, 0.18);
+    color: #6d5dfc;
+    box-shadow: 0 10px 26px rgba(110, 80, 255, 0.12);
+    font-size: 12px;
+    font-weight: 800;
 }
 
 .navbar {

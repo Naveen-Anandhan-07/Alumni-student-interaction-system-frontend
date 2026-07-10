@@ -19,7 +19,7 @@ import {
 import api from "../services/api";
 import LoadingState from "../components/LoadingState";
 import "../styles/Forum.css";
-import { getProfileImageUrl } from "../utils/profileImage";
+import { getProfileImageUrl, getProfileInitial } from "../utils/profileImage";
 
 function ForumQuestion() {
   const navigate = useNavigate();
@@ -127,20 +127,8 @@ function ForumQuestion() {
     navigate("/login");
   };
 
-  const initials = user?.name
-    ?.split(" ")
-    .map((w) => w[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
-
   const displayName = profile?.name || user?.name || "User";
-  const displayInitials = displayName
-    .split(" ")
-    .map((word) => word[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
+  const displayInitial = getProfileInitial(displayName, "U");
   const profileImageUrl = getProfileImageUrl(profile);
 
   const mentorshipPath =
@@ -179,6 +167,9 @@ function ForumQuestion() {
           <a className="active" onClick={() => navigate("/forum")}>
             <MessageSquare size={20} /> Forum
           </a>
+          <a onClick={() => navigate("/chat")}>
+            <MessageSquare size={20} /> Chat
+          </a>
           <a onClick={() => navigate("/notifications")}>
             <Bell size={20} /> Notifications
           </a>
@@ -206,7 +197,7 @@ function ForumQuestion() {
                 {profileImageUrl ? (
                   <img src={profileImageUrl} alt={displayName} />
                 ) : (
-                  displayInitials || initials || "U"
+                  displayInitial
                 )}
               </div>
               <div>
@@ -261,7 +252,7 @@ function ForumQuestion() {
                 <div className="fm-discussion-answer" key={ans.id}>
                   <div className="fm-answer-user">
                     <div className="fm-answer-avatar">
-                      {ans.alumniName?.charAt(0).toUpperCase() || "A"}
+                      {getProfileInitial(ans.alumniName, "A")}
                     </div>
                     <div>
                       <h3>{ans.alumniName || `Alumni ${ans.alumniId}`}</h3>

@@ -19,10 +19,9 @@ import {
 import api from "../services/api";
 import LoadingState from "../components/LoadingState";
 import "../styles/StudentDashboard.css";
-import MessageInbox from "../components/MessageInbox";
 import "../styles/StudentJobs.css";
 import "../styles/StudentEvents.css";
-import { getProfileImageUrl } from "../utils/profileImage";
+import { getProfileImageUrl, getProfileInitial } from "../utils/profileImage";
 import useUnreadNotifications from "../hooks/useUnreadNotifications";
 
 function StudentDashboard() {
@@ -172,9 +171,7 @@ function StudentDashboard() {
     );
   }
 
-  const firstLetter = student.name
-    ? student.name.charAt(0).toUpperCase()
-    : "S";
+  const firstLetter = getProfileInitial(student.name, "S");
   const profileImageUrl = getProfileImageUrl(student);
 
   let mentorStatus = "NONE";
@@ -221,6 +218,11 @@ function StudentDashboard() {
           <a onClick={() => navigate("/forum")}>
             <MessageSquare size={20} />
             Forum
+          </a>
+
+          <a onClick={() => navigate("/chat")}>
+            <MessageSquare size={20} />
+            Chat
           </a>
 
           <a onClick={() => navigate("/notifications")}>
@@ -400,7 +402,23 @@ function StudentDashboard() {
             </div>
           </div>
         </section>
-        <MessageInbox />
+
+        <section className="sd-section-card">
+          <div className="sd-section-head">
+            <h2>Private Chat</h2>
+
+            <button
+              onClick={() => navigate("/chat")}
+            >
+              Open Chat
+            </button>
+          </div>
+
+          <p>
+            Continue one-to-one mentorship conversations on the dedicated chat
+            page.
+          </p>
+        </section>
 
         <section className="sd-section-card">
           <div className="sd-section-head">

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import "../styles/Auth.css";
 import { useNavigate } from "react-router-dom";
 import api from "../services/api";
+import { PROJECT_VERSION } from "../version";
 
 function Login() {
   const [form, setForm] = useState({
@@ -41,6 +42,9 @@ const signUp = () =>{
 }
   return (
     <div className="auth-page">
+      <div className="project-version-badge auth-version">
+        Version {PROJECT_VERSION}
+      </div>
       <div className="auth-card">
         <div className="auth-left">
           <span className="auth-badge">Welcome Back</span>

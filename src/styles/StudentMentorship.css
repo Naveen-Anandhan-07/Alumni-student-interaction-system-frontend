@@ -91,6 +91,11 @@ body {
   margin-bottom: 24px;
 }
 
+.sm-topbar h2 {
+  margin: 0;
+  color: #17132f;
+}
+
 .sm-search-top {
   width: 520px;
   height: 52px;

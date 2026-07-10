@@ -16,7 +16,7 @@ import {
 import api from "../services/api";
 import LoadingState from "../components/LoadingState";
 import "../styles/Notifications.css";
-import { getProfileImageUrl } from "../utils/profileImage";
+import { getProfileImageUrl, getProfileInitial } from "../utils/profileImage";
 
 function Notifications() {
   const navigate = useNavigate();
@@ -252,6 +252,11 @@ function Notifications() {
             Forum
           </a>
 
+          <a onClick={() => navigate("/chat")}>
+            <MessageSquare size={20} />
+            Chat
+          </a>
+
           <a className="active">
             <Bell size={20} />
             Notifications
@@ -284,7 +289,7 @@ function Notifications() {
                 {profileImageUrl ? (
                   <img src={profileImageUrl} alt={profileName} />
                 ) : (
-                  profileName.charAt(0).toUpperCase()
+                  getProfileInitial(profileName, "U")
                 )}
               </div>
 

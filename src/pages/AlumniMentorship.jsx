@@ -6,16 +6,18 @@ import {
   Briefcase,
   CalendarDays,
   ChevronDown,
+  Filter,
   LayoutDashboard,
   LogOut,
   MessageSquare,
+  Search,
   User,
   Users,
 } from "lucide-react";
 import api from "../services/api";
 import LoadingState from "../components/LoadingState";
 import "../styles/AlumniMentorship.css";
-import { getProfileImageUrl } from "../utils/profileImage";
+import { getProfileImageUrl, getProfileInitial } from "../utils/profileImage";
 import useUnreadNotifications from "../hooks/useUnreadNotifications";
 
 function AlumniMentorship() {
@@ -25,6 +27,8 @@ function AlumniMentorship() {
   const [alumni, setAlumni] = useState(null);
   const [mentorships, setMentorships] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("All Statuses");
   const unreadCount = useUnreadNotifications(user);
 
   useEffect(() => {
@@ -104,11 +108,31 @@ function AlumniMentorship() {
     navigate("/login");
   };
 
-  const pendingRequests = mentorships.filter(
+  const filteredMentorships = mentorships.filter((mentorship) => {
+    const searchText = [
+      mentorship.studentName,
+      mentorship.studentDepartment,
+      mentorship.studentYear,
+      mentorship.studentEmail,
+      mentorship.studentSkills,
+      mentorship.message,
+      mentorship.status,
+    ]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase();
+    const matchesSearch = searchText.includes(searchTerm.trim().toLowerCase());
+    const matchesStatus =
+      statusFilter === "All Statuses" || mentorship.status === statusFilter;
+
+    return matchesSearch && matchesStatus;
+  });
+
+  const pendingRequests = filteredMentorships.filter(
     (mentorship) => mentorship.status === "PENDING"
   );
 
-  const acceptedMentees = mentorships.filter(
+  const acceptedMentees = filteredMentorships.filter(
     (mentorship) => mentorship.status === "ACCEPTED"
   );
 
@@ -122,7 +146,7 @@ function AlumniMentorship() {
   }
 
   const alumniName = alumni?.name || user?.name || "Alumni";
-  const alumniInitials = alumniName.substring(0, 2).toUpperCase();
+  const alumniInitials = getProfileInitial(alumniName, "A");
   const profileImageUrl = getProfileImageUrl(alumni);
 
   return (
@@ -173,6 +197,11 @@ function AlumniMentorship() {
           <a onClick={() => navigate("/forum")}>
             <MessageSquare size={20} />
             Forum
+          </a>
+
+          <a onClick={() => navigate("/chat")}>
+            <MessageSquare size={20} />
+            Chat
           </a>
 
           <a
@@ -239,6 +268,29 @@ function AlumniMentorship() {
           </div>
         </section>
 
+        <section className="am-filter-card">
+          <div className="am-search-box">
+            <Search size={20} />
+            <input
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Search students, departments, skills..."
+            />
+          </div>
+
+          <div className="am-filter-box">
+            <Filter size={18} />
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+            >
+              <option>All Statuses</option>
+              <option>PENDING</option>
+              <option>ACCEPTED</option>
+            </select>
+          </div>
+        </section>
+
         <section className="am-summary">
           <div className="am-summary-card">
             <h3>Pending Requests</h3>
@@ -272,9 +324,7 @@ function AlumniMentorship() {
                 >
                   <div className="am-student">
                     <div className="am-avatar">
-                      {mentorship.studentName
-                        ?.charAt(0)
-                        .toUpperCase() || "S"}
+                      {getProfileInitial(mentorship.studentName, "S")}
                     </div>
 
                     <div>
@@ -366,9 +416,7 @@ function AlumniMentorship() {
                 >
                   <div className="am-student">
                     <div className="am-avatar accepted">
-                      {mentorship.studentName
-                        ?.charAt(0)
-                        .toUpperCase() || "S"}
+                      {getProfileInitial(mentorship.studentName, "S")}
                     </div>
 
                     <div>
