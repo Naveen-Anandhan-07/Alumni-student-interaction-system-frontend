@@ -4,10 +4,19 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  position: relative;
   background:
     radial-gradient(circle at left top, rgba(124, 92, 255, 0.25), transparent 32%),
     radial-gradient(circle at right bottom, rgba(245, 95, 179, 0.14), transparent 30%),
     #faf8ff;
+}
+
+.auth-version {
+  position: absolute;
+  top: 22px;
+  right: 28px;
+  margin: 0;
+  z-index: 2;
 }
 
 .auth-card {

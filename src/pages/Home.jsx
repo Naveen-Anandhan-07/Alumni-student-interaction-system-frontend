@@ -4,6 +4,7 @@ import FeatureCard from "../components/FeatureCard";
 import StatCard from "../components/StatCard";
 import heroImage from "../assets/hero-graduation.png";
 import { useNavigate } from "react-router-dom";
+import { PROJECT_VERSION } from "../version";
 
 function Home() {
   const navigate = useNavigate();
@@ -13,6 +14,7 @@ function Home() {
   }
   return (
     <div className="home-page">
+      <div className="project-version-badge">Version {PROJECT_VERSION}</div>
       <Navbar />
 
       <section className="hero-section">

@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { useMessages } from "../context/MessageContext";
+import { getProfileInitial } from "../utils/profileImage";
 import "../styles/MessageInbox.css";
 
-function MessageInbox() {
+function MessageInbox({ page = false }) {
   const {
     conversations,
     messages,
@@ -19,6 +20,7 @@ function MessageInbox() {
   const currentUser = JSON.parse(
     localStorage.getItem("user")
   );
+  const isAlumni = currentUser?.role === "ALUMNI";
 
   const selectedConversation = conversations.find(
     (conversation) =>
@@ -37,6 +39,12 @@ function MessageInbox() {
       console.error("Failed to open conversation", error);
     }
   };
+
+  useEffect(() => {
+    if (!selectedId && conversations.length > 0) {
+      selectConversation(conversations[0].mentorshipId);
+    }
+  }, [conversations, selectedId]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({
@@ -67,18 +75,19 @@ function MessageInbox() {
 
   if (conversations.length === 0) {
     return (
-      <section className="message-inbox empty">
+      <section className={page ? "message-inbox empty page" : "message-inbox empty"}>
         <h2>Private Messages</h2>
         <p>
-          Private messaging becomes available after a
-          mentorship request is accepted.
+          {isAlumni
+            ? "You do not have any accepted student mentees yet. Private chat will appear after you accept a mentorship request."
+            : "You do not have an accepted alumni mentor yet. Private chat will appear after an alumni accepts your mentorship request."}
         </p>
       </section>
     );
   }
 
   return (
-    <section className="message-inbox">
+    <section className={page ? "message-inbox page" : "message-inbox"}>
       <aside className="message-conversations">
         <div className="message-title">
           <h2>Private Messages</h2>
@@ -102,9 +111,7 @@ function MessageInbox() {
             }
           >
             <div className="conversation-avatar">
-              {conversation.otherPersonName
-                ?.charAt(0)
-                .toUpperCase() || "U"}
+              {getProfileInitial(conversation.otherPersonName, "U")}
             </div>
 
             <div className="conversation-info">

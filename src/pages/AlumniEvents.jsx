@@ -23,7 +23,7 @@ import { useNavigate } from "react-router-dom";
 import api from "../services/api";
 import LoadingState from "../components/LoadingState";
 import "../styles/AlumniEvents.css";
-import { getProfileImageUrl } from "../utils/profileImage";
+import { getProfileImageUrl, getProfileInitial } from "../utils/profileImage";
 import useUnreadNotifications from "../hooks/useUnreadNotifications";
 
 function AlumniEvents() {
@@ -35,6 +35,9 @@ function AlumniEvents() {
   const [image, setImage] = useState(null);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("All Categories");
+  const [modeFilter, setModeFilter] = useState("All Modes");
   const unreadCount = useUnreadNotifications(user);
 
   const [eventForm, setEventForm] = useState({
@@ -162,8 +165,30 @@ function AlumniEvents() {
   }
 
   const alumniName = alumni?.name || "Alumni";
-  const alumniInitials = alumniName.substring(0, 2).toUpperCase();
+  const alumniInitials = getProfileInitial(alumniName, "A");
   const profileImageUrl = getProfileImageUrl(alumni);
+  const eventMatchesFilters = (event) => {
+    const searchText = [
+      event.title,
+      event.description,
+      event.eventType,
+      event.mode,
+      event.venueOrLink,
+      event.requiredSkills,
+      event.status,
+    ]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase();
+    const matchesSearch = searchText.includes(searchTerm.trim().toLowerCase());
+    const matchesCategory =
+      categoryFilter === "All Categories" || event.eventType === categoryFilter;
+    const matchesMode = modeFilter === "All Modes" || event.mode === modeFilter;
+
+    return matchesSearch && matchesCategory && matchesMode;
+  };
+  const filteredMyEvents = myEvents.filter(eventMatchesFilters);
+  const filteredAllEvents = allEvents.filter(eventMatchesFilters);
 
   return (
     <div className="alumni-events-layout">
@@ -197,6 +222,10 @@ function AlumniEvents() {
             <MessageSquare size={20} />
             Forum
           </a>
+          <a onClick={() => navigate("/chat")}>
+            <MessageSquare size={20} />
+            Chat
+          </a>
           <a onClick={() => navigate("/notifications")}>
             <Bell size={20} />
             Notifications
@@ -210,11 +239,6 @@ function AlumniEvents() {
 
       <main className="ae-main">
         <header className="ae-topbar">
-          <div className="ae-search-top">
-            <Search size={20} />
-            <input placeholder="Search events, students, jobs..." />
-          </div>
-
           <div className="ae-top-actions">
             <button
               className="ae-icon-btn"
@@ -265,12 +289,19 @@ function AlumniEvents() {
         <section className="ae-filter-card">
           <div className="ae-search-box">
             <Search size={20} />
-            <input placeholder="Search event title..." />
+            <input
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Search events, skills, venue..."
+            />
           </div>
 
           <div className="ae-filter-box">
             <Filter size={18} />
-            <select>
+            <select
+              value={categoryFilter}
+              onChange={(e) => setCategoryFilter(e.target.value)}
+            >
               <option>All Categories</option>
               <option>Workshop</option>
               <option>Webinar</option>
@@ -281,7 +312,10 @@ function AlumniEvents() {
 
           <div className="ae-filter-box">
             <Monitor size={18} />
-            <select>
+            <select
+              value={modeFilter}
+              onChange={(e) => setModeFilter(e.target.value)}
+            >
               <option>All Modes</option>
               <option>Online</option>
               <option>Offline</option>
@@ -299,10 +333,10 @@ function AlumniEvents() {
           </div>
 
           <div className="ae-events-grid">
-            {myEvents.length === 0 ? (
-              <div className="ae-empty">No events posted yet.</div>
+            {filteredMyEvents.length === 0 ? (
+              <div className="ae-empty">No posted events match your filters.</div>
             ) : (
-              myEvents.map((event) => (
+              filteredMyEvents.map((event) => (
                 <EventCard
                   key={event.id}
                   own
@@ -332,10 +366,10 @@ function AlumniEvents() {
           </div>
 
           <div className="ae-events-grid">
-            {allEvents.length === 0 ? (
-              <div className="ae-empty">No events available.</div>
+            {filteredAllEvents.length === 0 ? (
+              <div className="ae-empty">No events match your filters.</div>
             ) : (
-              allEvents.map((event) => (
+              filteredAllEvents.map((event) => (
                 <EventCard
                   key={event.id}
                   title={event.title}

@@ -23,6 +23,7 @@ import AlumniEvents from "./pages/AlumniEvents";
 import Forum from "./pages/Forum";
 import ForumQuestion from "./pages/ForumQuestion";
 import Notifications from "./pages/Notifications";
+import Chat from "./pages/Chat";
 import ErrorBoundary from "./components/ErrorBoundary";
 import LoadingState from "./components/LoadingState";
 
@@ -116,6 +117,11 @@ function App() {
         <Route
           path="/notifications"
           element={<Notifications />}
+        />
+
+        <Route
+          path="/chat"
+          element={<Chat />}
         />
 
         <Route

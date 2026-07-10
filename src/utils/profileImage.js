@@ -24,3 +24,14 @@ export const getProfileImageUrl = (profile) => {
 
   return `${API_HOST}${imagePath}`;
 };
+
+export const getProfileInitial = (value, fallback = "U") => {
+  const text = String(value || "").trim();
+  const fallbackText = String(fallback || "U").trim();
+
+  if (text) {
+    return text.charAt(0).toUpperCase();
+  }
+
+  return fallbackText ? fallbackText.charAt(0).toUpperCase() : "U";
+};

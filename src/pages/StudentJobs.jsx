@@ -19,7 +19,7 @@ import api from "../services/api";
 import LoadingState from "../components/LoadingState";
 import "../styles/StudentJobs.css";
 import { useNavigate } from "react-router-dom";
-import { getProfileImageUrl } from "../utils/profileImage";
+import { getProfileImageUrl, getProfileInitial } from "../utils/profileImage";
 import useUnreadNotifications from "../hooks/useUnreadNotifications";
 
 function StudentJobs() {
@@ -30,6 +30,9 @@ function StudentJobs() {
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
   const [user, setUser] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [jobTypeFilter, setJobTypeFilter] = useState("All Types");
+  const [locationFilter, setLocationFilter] = useState("All Locations");
   const unreadCount = useUnreadNotifications(user);
 
   const handleLogout = () => {
@@ -112,9 +115,7 @@ function StudentJobs() {
     );
   }
 
-  const firstLetter = student?.name
-    ? student.name.charAt(0).toUpperCase()
-    : "S";
+  const firstLetter = getProfileInitial(student?.name, "S");
   const profileImageUrl = getProfileImageUrl(student);
 
   const appliedJobKeys = new Set(
@@ -138,6 +139,27 @@ function StudentJobs() {
       !appliedJobKeys.has(idKey) &&
       !appliedJobKeys.has(titleCompanyKey)
     );
+  });
+
+  const filteredAvailableJobs = availableJobs.filter((job) => {
+    const searchText = [
+      job.title,
+      job.company,
+      job.description,
+      job.location,
+      job.jobType,
+      job.skillsRequired,
+    ]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase();
+    const matchesSearch = searchText.includes(searchTerm.trim().toLowerCase());
+    const matchesType =
+      jobTypeFilter === "All Types" || job.jobType === jobTypeFilter;
+    const matchesLocation =
+      locationFilter === "All Locations" || job.location === locationFilter;
+
+    return matchesSearch && matchesType && matchesLocation;
   });
 
   return (
@@ -172,6 +194,10 @@ function StudentJobs() {
             <MessageSquare size={20} />
             Forum
           </a>
+          <a onClick={() => navigate("/chat")}>
+            <MessageSquare size={20} />
+            Chat
+          </a>
           <a onClick={() => navigate("/notifications")}>
             <Bell size={20} />
             Notifications
@@ -185,10 +211,7 @@ function StudentJobs() {
 
       <main className="sj-main">
         <header className="sj-topbar">
-          <div className="sj-search-top">
-            <Search size={20} />
-            <input placeholder="Search jobs, internships, companies..." />
-          </div>
+          <h2>Jobs / Internships</h2>
 
           <div className="sj-top-actions">
             <button
@@ -224,12 +247,19 @@ function StudentJobs() {
         <section className="sj-filter-card">
           <div className="sj-search-box">
             <Search size={20} />
-            <input placeholder="Search job title..." />
+            <input
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Search jobs, companies, skills..."
+            />
           </div>
 
           <div className="sj-filter-box">
             <Briefcase size={18} />
-            <select>
+            <select
+              value={jobTypeFilter}
+              onChange={(e) => setJobTypeFilter(e.target.value)}
+            >
               <option>All Types</option>
               <option>Internship</option>
               <option>Full Time</option>
@@ -239,7 +269,10 @@ function StudentJobs() {
 
           <div className="sj-filter-box">
             <MapPin size={18} />
-            <select>
+            <select
+              value={locationFilter}
+              onChange={(e) => setLocationFilter(e.target.value)}
+            >
               <option>All Locations</option>
               <option>Chennai</option>
               <option>Bangalore</option>
@@ -301,10 +334,10 @@ function StudentJobs() {
           </div>
 
           <div className="sj-jobs-grid">
-            {availableJobs.length === 0 ? (
-              <div className="sj-empty">No unapplied jobs listed.</div>
+            {filteredAvailableJobs.length === 0 ? (
+              <div className="sj-empty">No jobs match your filters.</div>
             ) : (
-              availableJobs.map((job) => (
+              filteredAvailableJobs.map((job) => (
                 <JobCard key={job.id} job={job} onApply={applyJob} />
               ))
             )}

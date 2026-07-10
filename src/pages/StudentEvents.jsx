@@ -28,6 +28,9 @@ function StudentEvents() {
   const [recommendedEvents, setRecommendedEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("All Categories");
+  const [modeFilter, setModeFilter] = useState("All Modes");
 
   const handleLogout = () => {
     localStorage.clear();
@@ -97,6 +100,31 @@ function StudentEvents() {
     );
   }
 
+  const eventMatchesFilters = (event) => {
+    const searchText = [
+      event.title,
+      event.description,
+      event.eventType,
+      event.mode,
+      event.venueOrLink,
+      event.requiredSkills,
+      event.reason,
+      event.status,
+    ]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase();
+    const matchesSearch = searchText.includes(searchTerm.trim().toLowerCase());
+    const matchesCategory =
+      categoryFilter === "All Categories" || event.eventType === categoryFilter;
+    const matchesMode = modeFilter === "All Modes" || event.mode === modeFilter;
+
+    return matchesSearch && matchesCategory && matchesMode;
+  };
+
+  const filteredRecommendedEvents = recommendedEvents.filter(eventMatchesFilters);
+  const filteredAllEvents = allEvents.filter(eventMatchesFilters);
+
   return (
     <div className="student-events-layout">
       <aside className="se-sidebar">
@@ -129,6 +157,10 @@ function StudentEvents() {
             <MessageSquare size={20} />
             Forum
           </a>
+          <a onClick={() => navigate("/chat")}>
+            <MessageSquare size={20} />
+            Chat
+          </a>
           <a onClick={() => navigate("/notifications")}>
             <Bell size={20} />
             Notifications
@@ -144,12 +176,20 @@ function StudentEvents() {
         <section className="events-filter-card">
           <div className="search-box">
             <Search size={20} />
-            <input type="text" placeholder="Search events..." />
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Search events, skills, venue..."
+            />
           </div>
 
           <div className="filter-box">
             <Filter size={18} />
-            <select>
+            <select
+              value={categoryFilter}
+              onChange={(e) => setCategoryFilter(e.target.value)}
+            >
               <option>All Categories</option>
               <option>Workshop</option>
               <option>Webinar</option>
@@ -160,7 +200,10 @@ function StudentEvents() {
 
           <div className="filter-box">
             <Monitor size={18} />
-            <select>
+            <select
+              value={modeFilter}
+              onChange={(e) => setModeFilter(e.target.value)}
+            >
               <option>All Modes</option>
               <option>Online</option>
               <option>Offline</option>
@@ -180,10 +223,10 @@ function StudentEvents() {
           </div>
 
           <div className="events-grid">
-            {recommendedEvents.length === 0 ? (
-              <div className="event-empty">No recommended events listed.</div>
+            {filteredRecommendedEvents.length === 0 ? (
+              <div className="event-empty">No recommended events match your filters.</div>
             ) : (
-              recommendedEvents.map((event) => (
+              filteredRecommendedEvents.map((event) => (
                 <EventCard
                   key={event.eventId}
                   recommended
@@ -215,10 +258,10 @@ function StudentEvents() {
           </div>
 
           <div className="events-grid">
-            {allEvents.length === 0 ? (
-              <div className="event-empty">No events listed.</div>
+            {filteredAllEvents.length === 0 ? (
+              <div className="event-empty">No events match your filters.</div>
             ) : (
-              allEvents.map((event) => (
+              filteredAllEvents.map((event) => (
                 <EventCard
                   key={event.id}
                   eventId={event.id}

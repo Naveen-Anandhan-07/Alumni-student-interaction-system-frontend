@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 import api from "../services/api";
 import "../styles/Forum.css";
-import { getProfileImageUrl } from "../utils/profileImage";
+import { getProfileImageUrl, getProfileInitial } from "../utils/profileImage";
 
 function Forum() {
   const navigate = useNavigate();
@@ -141,20 +141,8 @@ function Forum() {
     navigate("/login");
   };
 
-  const initials = user?.name
-    ?.split(" ")
-    .map((word) => word[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
-
   const displayName = profile?.name || user?.name || "User";
-  const displayInitials = displayName
-    .split(" ")
-    .map((word) => word[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
+  const displayInitial = getProfileInitial(displayName, "U");
   const profileImageUrl = getProfileImageUrl(profile);
 
   const profilePath = user?.role === "STUDENT" ? "/student/profile" : "/alumni/profile";
@@ -195,6 +183,10 @@ function Forum() {
             <MessageSquare size={20} />
             Forum
           </a>
+          <a onClick={() => navigate("/chat")}>
+            <MessageSquare size={20} />
+            Chat
+          </a>
           <a onClick={() => navigate("/notifications")}>
             <Bell size={20} />
             Notifications
@@ -229,7 +221,7 @@ function Forum() {
                 {profileImageUrl ? (
                   <img src={profileImageUrl} alt={displayName} />
                 ) : (
-                  displayInitials || initials || "U"
+                  displayInitial
                 )}
               </div>
               <div>

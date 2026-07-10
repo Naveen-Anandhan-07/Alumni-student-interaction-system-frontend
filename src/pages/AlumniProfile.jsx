@@ -18,7 +18,11 @@ import {
 import api from "../services/api";
 import LoadingState from "../components/LoadingState";
 import "../styles/Profile.css";
-import { getProfileImagePath, getProfileImageUrl } from "../utils/profileImage";
+import {
+  getProfileImagePath,
+  getProfileImageUrl,
+  getProfileInitial,
+} from "../utils/profileImage";
 
 const splitSkills = (skills) =>
   skills
@@ -218,7 +222,7 @@ function AlumniProfile() {
     return <div className="profile-loading">Alumni profile is not available.</div>;
   }
 
-  const firstLetter = alumni.name ? alumni.name.charAt(0).toUpperCase() : "A";
+  const firstLetter = getProfileInitial(alumni.name, "A");
   const profileImageUrl = previewImage || getProfileImageUrl(alumni);
   const hasProfileImage = Boolean(getProfileImagePath(alumni));
 
@@ -258,6 +262,11 @@ function AlumniProfile() {
           <a onClick={() => navigate("/forum")}>
             <MessageSquare size={20} />
             Forum
+          </a>
+
+          <a onClick={() => navigate("/chat")}>
+            <MessageSquare size={20} />
+            Chat
           </a>
 
           <a onClick={() => navigate("/notifications")}>

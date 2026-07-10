@@ -19,7 +19,7 @@ import { useNavigate } from "react-router-dom";
 import api from "../services/api";
 import LoadingState from "../components/LoadingState";
 import "../styles/StudentMentorship.css";
-import { getProfileImageUrl } from "../utils/profileImage";
+import { getProfileImageUrl, getProfileInitial } from "../utils/profileImage";
 import useUnreadNotifications from "../hooks/useUnreadNotifications";
 
 function StudentMentorship() {
@@ -32,6 +32,9 @@ function StudentMentorship() {
   const [loading, setLoading] = useState(true);
   const [activeRequestAlumniId, setActiveRequestAlumniId] = useState(null);
   const [requestMessage, setRequestMessage] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [companyFilter, setCompanyFilter] = useState("All Companies");
+  const [skillFilter, setSkillFilter] = useState("All Skills");
   const unreadCount = useUnreadNotifications(user);
 
   useEffect(() => {
@@ -152,8 +155,30 @@ function StudentMentorship() {
   }
 
   const displayName = student?.name || user?.name || "Student";
-  const initials = displayName.substring(0, 2).toUpperCase();
+  const initials = getProfileInitial(displayName, "S");
   const profileImageUrl = getProfileImageUrl(student);
+  const filteredAlumniList = alumniList.filter((alumni) => {
+    const searchText = [
+      alumni.name,
+      alumni.designation,
+      alumni.company,
+      alumni.bio,
+      alumni.about,
+      alumni.skills,
+    ]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase();
+    const skills = alumni.skills || "";
+    const matchesSearch = searchText.includes(searchTerm.trim().toLowerCase());
+    const matchesCompany =
+      companyFilter === "All Companies" || alumni.company === companyFilter;
+    const matchesSkill =
+      skillFilter === "All Skills" ||
+      skills.toLowerCase().includes(skillFilter.toLowerCase());
+
+    return matchesSearch && matchesCompany && matchesSkill;
+  });
 
   return (
     <div className="student-mentorship-layout">
@@ -187,6 +212,10 @@ function StudentMentorship() {
             <MessageSquare size={20} />
             Forum
           </a>
+          <a onClick={() => navigate("/chat")}>
+            <MessageSquare size={20} />
+            Chat
+          </a>
           <a onClick={() => navigate("/notifications")}>
             <Bell size={20} />
             Notifications
@@ -200,10 +229,7 @@ function StudentMentorship() {
 
       <main className="sm-main">
         <header className="sm-topbar">
-          <div className="sm-search-top">
-            <Search size={20} />
-            <input placeholder="Search alumni, skills, company..." />
-          </div>
+          <h2>Mentorship</h2>
 
           <div className="sm-top-actions">
             <button
@@ -263,12 +289,19 @@ function StudentMentorship() {
         <section className="sm-filter-card">
           <div className="sm-search-box">
             <Search size={20} />
-            <input placeholder="Search alumni by name..." />
+            <input
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Search alumni, skills, company..."
+            />
           </div>
 
           <div className="sm-filter-box">
             <Building2 size={18} />
-            <select>
+            <select
+              value={companyFilter}
+              onChange={(e) => setCompanyFilter(e.target.value)}
+            >
               <option>All Companies</option>
               <option>Zoho</option>
               <option>TCS</option>
@@ -279,7 +312,10 @@ function StudentMentorship() {
 
           <div className="sm-filter-box">
             <Users size={18} />
-            <select>
+            <select
+              value={skillFilter}
+              onChange={(e) => setSkillFilter(e.target.value)}
+            >
               <option>All Skills</option>
               <option>Java</option>
               <option>React</option>
@@ -298,10 +334,10 @@ function StudentMentorship() {
           </div>
 
           <div className="sm-alumni-grid">
-            {alumniList.length === 0 ? (
-              <div className="sm-empty">No alumni listed.</div>
+            {filteredAlumniList.length === 0 ? (
+              <div className="sm-empty">No alumni match your filters.</div>
             ) : (
-              alumniList.map((alumni) => (
+              filteredAlumniList.map((alumni) => (
                 <AlumniCard
                   key={alumni.id}
                   alumni={alumni}
@@ -363,7 +399,7 @@ function AlumniCard({
           />
         ) : (
           <div className="sm-alumni-initial">
-            {alumni.name ? alumni.name.substring(0, 2).toUpperCase() : "AL"}
+            {getProfileInitial(alumni.name, "A")}
           </div>
         )}
       </div>

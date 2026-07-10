@@ -22,7 +22,7 @@ import { useNavigate } from "react-router-dom";
 import api from "../services/api";
 import LoadingState from "../components/LoadingState";
 import "../styles/AlumniJobs.css";
-import { getProfileImageUrl } from "../utils/profileImage";
+import { getProfileImageUrl, getProfileInitial } from "../utils/profileImage";
 import useUnreadNotifications from "../hooks/useUnreadNotifications";
 
 function AlumniJobs() {
@@ -35,6 +35,9 @@ function AlumniJobs() {
   const [showApplicants, setShowApplicants] = useState(false);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [jobTypeFilter, setJobTypeFilter] = useState("All Types");
+  const [locationFilter, setLocationFilter] = useState("All Locations");
   const unreadCount = useUnreadNotifications(user);
 
   const [jobForm, setJobForm] = useState({
@@ -153,6 +156,15 @@ function AlumniJobs() {
     }
   };
 
+  const viewStudentProfile = (studentId) => {
+    if (!studentId) {
+      alert("Student profile is not available for this application.");
+      return;
+    }
+
+    navigate(`/alumni/student/${studentId}`);
+  };
+
   if (loading) {
     return (
       <LoadingState
@@ -163,8 +175,30 @@ function AlumniJobs() {
   }
 
   const alumniName = alumni?.name || "Alumni";
-  const alumniInitials = alumniName.substring(0, 2).toUpperCase();
+  const alumniInitials = getProfileInitial(alumniName, "A");
   const profileImageUrl = getProfileImageUrl(alumni);
+  const jobMatchesFilters = (job) => {
+    const searchText = [
+      job.title,
+      job.company,
+      job.description,
+      job.location,
+      job.jobType,
+      job.skillsRequired,
+    ]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase();
+    const matchesSearch = searchText.includes(searchTerm.trim().toLowerCase());
+    const matchesType =
+      jobTypeFilter === "All Types" || job.jobType === jobTypeFilter;
+    const matchesLocation =
+      locationFilter === "All Locations" || job.location === locationFilter;
+
+    return matchesSearch && matchesType && matchesLocation;
+  };
+  const filteredMyJobs = myJobs.filter(jobMatchesFilters);
+  const filteredJobs = jobs.filter(jobMatchesFilters);
 
   return (
     <div className="alumni-jobs-layout">
@@ -198,6 +232,10 @@ function AlumniJobs() {
             <MessageSquare size={20} />
             Forum
           </a>
+          <a onClick={() => navigate("/chat")}>
+            <MessageSquare size={20} />
+            Chat
+          </a>
           <a onClick={() => navigate("/notifications")}>
             <Bell size={20} />
             Notifications
@@ -211,10 +249,7 @@ function AlumniJobs() {
 
       <main className="aj-main">
         <header className="aj-topbar">
-          <div className="aj-search-top">
-            <Search size={20} />
-            <input placeholder="Search jobs, applicants, companies..." />
-          </div>
+          <h2>Jobs / Internships</h2>
 
           <div className="aj-top-actions">
             <button
@@ -266,12 +301,19 @@ function AlumniJobs() {
         <section className="aj-filter-card">
           <div className="aj-search-box">
             <Search size={20} />
-            <input placeholder="Search job title..." />
+            <input
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Search jobs, companies, skills..."
+            />
           </div>
 
           <div className="aj-filter-box">
             <Filter size={18} />
-            <select>
+            <select
+              value={jobTypeFilter}
+              onChange={(e) => setJobTypeFilter(e.target.value)}
+            >
               <option>All Types</option>
               <option>Internship</option>
               <option>Full Time</option>
@@ -281,7 +323,10 @@ function AlumniJobs() {
 
           <div className="aj-filter-box">
             <MapPin size={18} />
-            <select>
+            <select
+              value={locationFilter}
+              onChange={(e) => setLocationFilter(e.target.value)}
+            >
               <option>All Locations</option>
               <option>Chennai</option>
               <option>Bangalore</option>
@@ -299,10 +344,10 @@ function AlumniJobs() {
           </div>
 
           <div className="aj-jobs-grid">
-            {myJobs.length === 0 ? (
-              <div className="aj-empty">No jobs posted yet.</div>
+            {filteredMyJobs.length === 0 ? (
+              <div className="aj-empty">No posted jobs match your filters.</div>
             ) : (
-              myJobs.map((job) => (
+              filteredMyJobs.map((job) => (
                 <JobCard
                   key={job.id}
                   job={job}
@@ -323,10 +368,10 @@ function AlumniJobs() {
           </div>
 
           <div className="aj-jobs-grid">
-            {jobs.length === 0 ? (
-              <div className="aj-empty">No jobs listed.</div>
+            {filteredJobs.length === 0 ? (
+              <div className="aj-empty">No jobs match your filters.</div>
             ) : (
-              jobs.map((job) => (
+              filteredJobs.map((job) => (
                 <JobCard
                   key={job.id}
                   job={job}
@@ -461,6 +506,19 @@ function AlumniJobs() {
                     <span className={`aj-status ${app.status?.toLowerCase()}`}>
                       {app.status}
                     </span>
+
+                    <button
+                      type="button"
+                      className="aj-view-profile-btn"
+                      onClick={() =>
+                        viewStudentProfile(
+                          app.studentId || app.student?.id || app.profileId
+                        )
+                      }
+                    >
+                      <Eye size={16} />
+                      View Profile
+                    </button>
 
                     <select
                       value={app.status}
