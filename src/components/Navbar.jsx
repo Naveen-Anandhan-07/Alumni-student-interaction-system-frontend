@@ -1,28 +1,18 @@
-import React from "react";
+import { GraduationCap } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 function Navbar() {
-    const navigate= useNavigate();
-
-    const handlesignUp= ()=>{
-    navigate("/signup");
-  }
-
-  const handleLogin= ()=>{
-    navigate("/login");
-  }
+  const navigate = useNavigate();
   return (
     <nav className="navbar">
-      <div className="brand">
-        <span className="brand-icon">🎓</span>
-        <span>Alumni Student <span>Interaction Platform</span></span>
-      </div>
-
-      
-
+      <button className="brand" onClick={() => navigate("/")} aria-label="Go to homepage">
+        <span className="brand-icon"><GraduationCap size={25} /></span>
+        <span>Alumni<span>Connect</span></span>
+      </button>
+      <div className="nav-message">A community built around your future.</div>
       <div className="nav-actions">
-        <button className="btn ghost" onClick={handleLogin}>Login</button>
-        <button className="btn primary" onClick={handlesignUp}>Sign Up</button>
+        <button className="btn nav-login" onClick={() => navigate("/login")}>Log in</button>
+        <button className="btn primary" onClick={() => navigate("/signup")}>Create account</button>
       </div>
     </nav>
   );

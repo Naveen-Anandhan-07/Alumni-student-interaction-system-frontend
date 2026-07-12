@@ -4,19 +4,25 @@ import {
   Bell,
   BookOpen,
   Briefcase,
+  Camera,
   CalendarDays,
+  FileText,
   GraduationCap,
   LayoutDashboard,
   Link2,
   LogOut,
   MessageSquare,
   Plus,
+  Save,
   Tag,
+  Trash2,
+  Upload,
   User,
   Users,
   X,
 } from "lucide-react";
 import api from "../services/api";
+import { backendAssetUrl } from "../config/environment";
 import LoadingState from "../components/LoadingState";
 import "../styles/Profile.css";
 import {
@@ -271,7 +277,7 @@ const uploadResume = async () => {
   const hasProfileImage = Boolean(getProfileImagePath(student));
 
   return (
-  <div className="student-profile-layout">
+  <div className={isAlumni ? "student-profile-layout" : "student-profile-layout student-own-profile"}>
     {/* SIDEBAR */}
     <aside className="pf-sidebar">
       <div className="pf-logo">
@@ -406,17 +412,24 @@ const uploadResume = async () => {
             <div className="pf-upload-box">
               <input
                 id="student-profile-image"
+                className="pf-file-input"
                 name="studentProfileImage"
                 type="file"
                 accept="image/*"
                 onChange={handleImageChange}
               />
 
+              <label htmlFor="student-profile-image" className="pf-file-trigger">
+                <Camera size={17} />
+                {hasProfileImage ? "Change photo" : "Choose photo"}
+              </label>
+
               {selectedImage ? (
                 <button
                   type="button"
                   onClick={uploadProfileImage}
                 >
+                  <Upload size={16} />
                   Save New Photo
                 </button>
               ) : hasProfileImage ? (
@@ -425,6 +438,7 @@ const uploadResume = async () => {
                   className="danger"
                   onClick={removeProfileImage}
                 >
+                  <Trash2 size={16} />
                   Remove Photo
                 </button>
               ) : null}
@@ -556,6 +570,7 @@ const uploadResume = async () => {
           {!isAlumni && (
             <div className="pf-form-actions">
               <button type="submit">
+                <Save size={17} />
                 Save Academic Details
               </button>
             </div>
@@ -589,7 +604,7 @@ const uploadResume = async () => {
             <div className="pf-career-actions">
               {student.resumePdf && (
                 <a
-                  href={backendAssetUrla(student.resumePdf)}
+                  href={backendAssetUrl(student.resumePdf)}
                   target="_blank"
                   rel="noreferrer"
                 >
@@ -603,17 +618,27 @@ const uploadResume = async () => {
             <div className="pf-resume-upload">
               <input
                 id="student-resume"
+                className="pf-file-input"
                 name="studentResume"
                 type="file"
                 accept="application/pdf"
                 onChange={handleResumeChange}
               />
 
+              <label htmlFor="student-resume" className="pf-resume-picker">
+                <FileText size={18} />
+                <span>
+                  <strong>{selectedResume ? selectedResume.name : "Choose a PDF resume"}</strong>
+                  <small>PDF file only</small>
+                </span>
+              </label>
+
               <button
                 type="button"
                 onClick={uploadResume}
                 disabled={!selectedResume}
               >
+                <Upload size={16} />
                 {student.resumePdf
                   ? "Replace Resume"
                   : "Upload Resume"}

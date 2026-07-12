@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { ArrowDown } from "lucide-react";
 import { useMessages } from "../context/MessageContext";
 import { getProfileInitial } from "../utils/profileImage";
 import "../styles/MessageInbox.css";
@@ -15,7 +16,13 @@ function MessageInbox({ page = false }) {
 
   const [selectedId, setSelectedId] = useState(null);
   const [content, setContent] = useState("");
-  const bottomRef = useRef(null);
+  const [conversationLoadVersion, setConversationLoadVersion] = useState(0);
+  const [showScrollToLatest, setShowScrollToLatest] = useState(false);
+  const messagesContainerRef = useRef(null);
+  const isNearBottomRef = useRef(true);
+  const previousMessageCountRef = useRef(0);
+  const previousConversationIdRef = useRef(null);
+  const forceScrollAfterSendRef = useRef(false);
 
   const currentUser = JSON.parse(
     localStorage.getItem("user")
@@ -27,14 +34,21 @@ function MessageInbox({ page = false }) {
       conversation.mentorshipId === selectedId
   );
 
-  const selectedMessages =
-    messages[selectedId] || [];
+  const selectedMessages = useMemo(
+    () => messages[selectedId] || [],
+    [messages, selectedId]
+  );
 
   const selectConversation = async (mentorshipId) => {
     setSelectedId(mentorshipId);
+    setShowScrollToLatest(false);
+    isNearBottomRef.current = true;
+    previousMessageCountRef.current = 0;
+    previousConversationIdRef.current = mentorshipId;
 
     try {
       await openConversation(mentorshipId);
+      setConversationLoadVersion((version) => version + 1);
     } catch (error) {
       console.error("Failed to open conversation", error);
     }
@@ -46,11 +60,99 @@ function MessageInbox({ page = false }) {
     }
   }, [conversations, selectedId]);
 
-  useEffect(() => {
-    bottomRef.current?.scrollIntoView({
-      behavior: "smooth",
+  const scrollToLatest = (behavior = "smooth") => {
+    const element = messagesContainerRef.current;
+
+    if (!element) {
+      return;
+    }
+
+    element.scrollTo({
+      top: element.scrollHeight,
+      behavior,
     });
-  }, [selectedMessages]);
+
+    isNearBottomRef.current = true;
+    setShowScrollToLatest(false);
+  };
+
+  useEffect(() => {
+    const element = messagesContainerRef.current;
+
+    if (!element) {
+      return undefined;
+    }
+
+    const handleMessagesScroll = () => {
+      const distanceFromBottom =
+        element.scrollHeight - element.scrollTop - element.clientHeight;
+
+      isNearBottomRef.current = distanceFromBottom < 100;
+
+      if (isNearBottomRef.current) {
+        setShowScrollToLatest(false);
+      }
+    };
+
+    element.addEventListener("scroll", handleMessagesScroll, {
+      passive: true,
+    });
+
+    handleMessagesScroll();
+
+    return () => {
+      element.removeEventListener("scroll", handleMessagesScroll);
+    };
+  }, [selectedId]);
+
+  useLayoutEffect(() => {
+    if (!selectedId) {
+      return;
+    }
+
+    const conversationChanged =
+      previousConversationIdRef.current !== selectedId;
+    const messageCountIncreased =
+      selectedMessages.length > previousMessageCountRef.current;
+
+    if (conversationChanged) {
+      previousConversationIdRef.current = selectedId;
+      previousMessageCountRef.current = selectedMessages.length;
+      scrollToLatest("auto");
+      return;
+    }
+
+    if (!messageCountIncreased) {
+      previousMessageCountRef.current = selectedMessages.length;
+      return;
+    }
+
+    const latestMessage = selectedMessages[selectedMessages.length - 1];
+    const sentByCurrentUser =
+      latestMessage?.senderUserId === currentUser?.userId;
+
+    if (
+      forceScrollAfterSendRef.current ||
+      sentByCurrentUser ||
+      isNearBottomRef.current
+    ) {
+      scrollToLatest("smooth");
+    } else {
+      setShowScrollToLatest(true);
+    }
+
+    forceScrollAfterSendRef.current = false;
+    previousMessageCountRef.current = selectedMessages.length;
+  }, [selectedId, selectedMessages, currentUser?.userId]);
+
+  useLayoutEffect(() => {
+    if (!selectedId || conversationLoadVersion === 0) {
+      return;
+    }
+
+    previousMessageCountRef.current = selectedMessages.length;
+    scrollToLatest("auto");
+  }, [conversationLoadVersion, selectedId]);
 
   useEffect(() => {
     return () => closeConversation();
@@ -66,9 +168,12 @@ function MessageInbox({ page = false }) {
     }
 
     try {
+      forceScrollAfterSendRef.current = true;
       sendMessage(selectedId, message);
       setContent("");
-    } catch (error) {
+      scrollToLatest("smooth");
+    } catch {
+      forceScrollAfterSendRef.current = false;
       alert("Unable to send message");
     }
   };
@@ -145,7 +250,8 @@ function MessageInbox({ page = false }) {
           </span>
         </header>
 
-        <div className="message-list">
+        <div className="message-list-wrap">
+          <div className="message-list" ref={messagesContainerRef}>
           {selectedMessages.length === 0 && (
             <p className="no-messages">
               No messages yet.
@@ -178,7 +284,19 @@ function MessageInbox({ page = false }) {
             );
           })}
 
-          <div ref={bottomRef} />
+          </div>
+
+          {showScrollToLatest && (
+            <button
+              type="button"
+              className="scroll-to-latest"
+              onClick={() => scrollToLatest("smooth")}
+              aria-label="Scroll to latest message"
+            >
+              <ArrowDown size={16} />
+              Latest messages
+            </button>
+          )}
         </div>
 
         <form

@@ -715,23 +715,53 @@ body {
 
 .pf-upload-box {
   margin: 18px 0;
-  display: grid;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
   gap: 10px;
 }
 
-.pf-upload-box input {
+.pf-file-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.pf-file-trigger {
+  min-height: 40px;
+  padding: 0 15px;
+  border: 1px solid #d5c8ff;
+  border-radius: 12px;
+  background: #f8f5ff;
+  color: #4b1fb8;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   font-size: 13px;
-  max-width: 100%;
+  font-weight: 800;
+  cursor: pointer;
 }
 
 .pf-upload-box button {
   height: 40px;
+  padding: 0 15px;
   border: none;
   border-radius: 12px;
   background: #4b1fb8;
   color: white;
   font-weight: 800;
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
 }
 
 .pf-upload-box button.danger {
@@ -833,6 +863,53 @@ body {
   width: 100%;
 }
 
+.pf-resume-upload .pf-file-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+}
+
+.pf-resume-picker {
+  min-width: 0;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #4b1fb8;
+  cursor: pointer;
+}
+
+.pf-resume-picker > svg {
+  width: 42px;
+  height: 42px;
+  padding: 11px;
+  flex: 0 0 auto;
+  border-radius: 12px;
+  background: #ede7ff;
+}
+
+.pf-resume-picker span,
+.pf-resume-picker strong,
+.pf-resume-picker small {
+  display: block;
+  min-width: 0;
+}
+
+.pf-resume-picker strong {
+  max-width: 430px;
+  overflow: hidden;
+  color: #17053f;
+  font-size: 13px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pf-resume-picker small {
+  margin-top: 3px;
+  color: #74708a;
+  font-size: 11px;
+}
+
 .pf-resume-upload button {
   height: 40px;
   border: none;
@@ -842,6 +919,368 @@ body {
   font-weight: 800;
   padding: 0 16px;
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+}
+
+/* STUDENT PROFILE REDESIGN */
+
+.student-own-profile .pf-page-head.compact {
+  min-height: 150px;
+  padding: 30px 34px;
+}
+
+.student-own-profile .pf-editor-grid.refined {
+  grid-template-columns: minmax(270px, 320px) minmax(0, 1fr);
+  grid-template-areas:
+    "photo details"
+    "career career"
+    "skills skills";
+  gap: 24px;
+  align-items: stretch;
+}
+
+.student-own-profile .pf-editor-grid.refined > .pf-photo-card {
+  position: static;
+  grid-area: photo;
+  align-self: stretch;
+  min-height: 100%;
+  overflow: hidden;
+}
+
+.student-own-profile .pf-editor-grid.refined > .pf-edit-card {
+  grid-area: details;
+  min-height: 100%;
+}
+
+.student-own-profile .pf-editor-grid.refined > .pf-career-card {
+  grid-area: career;
+  position: relative;
+  z-index: 0;
+}
+
+.student-own-profile .pf-editor-grid.refined > .pf-skills-card {
+  grid-area: skills;
+  position: relative;
+  z-index: 0;
+}
+
+.student-own-profile .pf-profile-card,
+.student-own-profile .pf-section-card {
+  border-radius: 20px;
+  box-shadow: 0 12px 34px rgba(23, 5, 63, 0.065);
+}
+
+.student-own-profile .pf-photo-card {
+  padding: 30px 26px;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(75, 31, 184, 0.1), transparent 34%),
+    #ffffff;
+}
+
+.student-own-profile .pf-avatar-large {
+  width: 108px;
+  height: 108px;
+  margin-bottom: 16px;
+  border: 5px solid #ffffff;
+  box-shadow: 0 12px 30px rgba(23, 5, 63, 0.18);
+}
+
+.student-own-profile .pf-profile-card h2 {
+  font-size: 24px;
+}
+
+.student-own-profile .pf-mini-info div {
+  padding: 12px;
+  background: #f8f6fc;
+}
+
+.student-own-profile .pf-section-card {
+  padding: 28px;
+}
+
+.student-own-profile .pf-section-head {
+  padding-bottom: 16px;
+  border-bottom: 1px solid #ece7f6;
+}
+
+.student-own-profile .pf-form-grid {
+  gap: 18px;
+}
+
+.student-own-profile .pf-form-grid input,
+.student-own-profile .pf-skill-input input {
+  height: 50px;
+  background: #ffffff;
+}
+
+.student-own-profile .pf-career-card {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.student-own-profile .pf-career-card .pf-section-head,
+.student-own-profile .pf-career-card .pf-resume-upload {
+  grid-column: 1 / -1;
+}
+
+.student-own-profile .pf-career-item {
+  margin: 0;
+  min-height: 96px;
+  background: #f9f7fd;
+}
+
+.student-own-profile .pf-career-card > .pf-career-item:first-of-type {
+  grid-column: 1 / -1;
+}
+
+.student-own-profile .pf-resume-upload {
+  margin: 0;
+  padding: 14px;
+  background: #fbfaff;
+}
+
+.student-own-profile .pf-skills-card {
+  overflow: hidden;
+}
+
+.student-own-profile .pf-skill-input {
+  margin-bottom: 20px;
+}
+
+.student-own-profile .pf-skills {
+  min-height: 45px;
+}
+
+@media (max-width: 1100px) {
+  .student-own-profile .pf-editor-grid.refined {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "photo"
+      "details"
+      "career"
+      "skills";
+  }
+
+  .student-own-profile .pf-editor-grid.refined > .pf-photo-card,
+  .student-own-profile .pf-editor-grid.refined > .pf-edit-card {
+    min-height: auto;
+  }
+}
+
+@media (max-width: 700px) {
+  .pf-main {
+    padding: 16px;
+  }
+
+  .student-own-profile .pf-page-head.compact,
+  .student-own-profile .pf-section-card,
+  .student-own-profile .pf-photo-card {
+    padding: 22px;
+  }
+
+  .student-own-profile .pf-page-head h1 {
+    font-size: 30px;
+  }
+
+  .student-own-profile .pf-career-card {
+    grid-template-columns: 1fr;
+  }
+
+  .student-own-profile .pf-career-card > *,
+  .student-own-profile .pf-career-card > .pf-career-item:first-of-type {
+    grid-column: 1;
+  }
+
+  .pf-skill-input {
+    grid-template-columns: 1fr;
+  }
+
+  .pf-skill-input button,
+  .pf-form-actions button,
+  .pf-resume-upload button {
+    width: 100%;
+  }
+}
+
+/* ALUMNI PROFILE REDESIGN */
+
+.alumni-profile-page .pf-page-head.compact {
+  min-height: 160px;
+  padding: 30px 34px;
+}
+
+.alumni-profile-page .pf-head-avatar {
+  width: 104px;
+  height: 104px;
+  flex: 0 0 auto;
+  border: 5px solid #ffffff;
+  border-radius: 28px;
+  box-shadow: 0 14px 34px rgba(75, 31, 184, 0.22);
+}
+
+.alumni-editor-grid {
+  display: grid;
+  grid-template-columns: minmax(270px, 320px) minmax(0, 1fr);
+  grid-template-areas:
+    "alumni-photo alumni-details"
+    "alumni-summary alumni-summary";
+  gap: 24px;
+  align-items: stretch;
+}
+
+.alumni-editor-grid > .pf-photo-card {
+  grid-area: alumni-photo;
+  position: static;
+  min-height: 100%;
+  grid-row: auto;
+  align-self: stretch;
+  overflow: hidden;
+}
+
+.alumni-editor-grid > .pf-edit-card {
+  grid-area: alumni-details;
+  min-height: 100%;
+}
+
+.alumni-editor-grid > .pf-summary-card {
+  grid-area: alumni-summary;
+}
+
+.alumni-profile-page .pf-profile-card,
+.alumni-profile-page .pf-section-card {
+  border-radius: 20px;
+  box-shadow: 0 12px 34px rgba(23, 5, 63, 0.065);
+}
+
+.alumni-profile-page .pf-photo-card {
+  padding: 30px 26px;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(75, 31, 184, 0.11), transparent 34%),
+    #ffffff;
+}
+
+.alumni-profile-page .pf-avatar-large {
+  width: 108px;
+  height: 108px;
+  margin-bottom: 16px;
+  border: 5px solid #ffffff;
+  box-shadow: 0 12px 30px rgba(23, 5, 63, 0.18);
+}
+
+.alumni-profile-page .pf-profile-card h2 {
+  font-size: 24px;
+}
+
+.alumni-profile-page .pf-info-list {
+  margin-top: 24px;
+}
+
+.alumni-profile-page .pf-info-list div {
+  padding: 14px;
+  background: #f8f6fc;
+}
+
+.alumni-profile-page .pf-section-card {
+  padding: 28px;
+}
+
+.alumni-profile-page .pf-section-head {
+  padding-bottom: 16px;
+  border-bottom: 1px solid #ece7f6;
+}
+
+.alumni-profile-page .pf-form-grid {
+  gap: 18px;
+}
+
+.alumni-profile-page .pf-form-grid input,
+.alumni-profile-page .pf-skill-input input {
+  height: 50px;
+  background: #ffffff;
+}
+
+.alumni-profile-page .pf-skills-editor {
+  margin-top: 28px;
+  padding-top: 24px;
+  border-top: 1px solid #ece7f6;
+}
+
+.alumni-profile-page .pf-skills-editor > label {
+  display: block;
+  margin-bottom: 16px;
+}
+
+.alumni-profile-page .pf-skill-input {
+  margin-top: 4px;
+}
+
+.alumni-profile-page .pf-skills {
+  min-height: 45px;
+}
+
+.alumni-profile-page .pf-summary-card {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.alumni-profile-page .pf-summary-card div {
+  min-width: 0;
+  padding: 20px;
+  background: linear-gradient(135deg, #fbfaff, #f5f1ff);
+}
+
+.alumni-profile-page .pf-summary-card svg {
+  width: 38px;
+  height: 38px;
+  padding: 9px;
+  border-radius: 12px;
+  background: #e9e2ff;
+}
+
+.alumni-profile-page .pf-summary-card strong {
+  overflow-wrap: anywhere;
+  font-size: 15px;
+}
+
+@media (max-width: 1100px) {
+  .alumni-editor-grid {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "alumni-photo"
+      "alumni-details"
+      "alumni-summary";
+  }
+
+  .alumni-editor-grid > .pf-photo-card,
+  .alumni-editor-grid > .pf-edit-card {
+    min-height: auto;
+  }
+
+  .alumni-profile-page .pf-head-avatar {
+    width: 100%;
+    height: 100px;
+  }
+}
+
+@media (max-width: 700px) {
+  .alumni-profile-page .pf-page-head.compact,
+  .alumni-profile-page .pf-section-card,
+  .alumni-profile-page .pf-photo-card {
+    padding: 22px;
+  }
+
+  .alumni-profile-page .pf-page-head h1 {
+    font-size: 30px;
+  }
+
+  .alumni-profile-page .pf-summary-card {
+    grid-template-columns: 1fr;
+  }
 }
 
 .pf-resume-upload button:disabled {
