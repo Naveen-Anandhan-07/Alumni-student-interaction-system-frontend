@@ -13,9 +13,11 @@ body {
 
 .chat-page-layout {
   min-height: 100vh;
+  height: auto;
   display: grid;
   grid-template-columns: 260px 1fr;
   background: #f7f5fb;
+  overflow: visible;
 }
 
 .chat-sidebar {
@@ -71,9 +73,15 @@ body {
 .chat-main {
   padding: 24px 28px 42px;
   min-width: 0;
+  min-height: 0;
+  height: auto;
+  display: flex;
+  flex-direction: column;
+  overflow: visible;
 }
 
 .chat-topbar {
+  flex-shrink: 0;
   min-height: 64px;
   display: flex;
   align-items: center;
@@ -178,6 +186,7 @@ body {
 }
 
 .chat-page-head {
+  flex-shrink: 0;
   min-height: 160px;
   padding: 30px 34px;
   border-radius: 24px;
@@ -221,5 +230,19 @@ body {
   .chat-topbar {
     align-items: stretch;
     flex-direction: column;
+  }
+}
+
+@media (max-width: 800px) {
+  .chat-main {
+    padding: 18px 16px;
+  }
+
+  .chat-page-head {
+    display: none;
+  }
+
+  .chat-topbar {
+    margin-bottom: 16px;
   }
 }

@@ -5,12 +5,16 @@ import {
   BookOpen,
   Briefcase,
   Building,
+  Camera,
   CalendarDays,
   LayoutDashboard,
   LogOut,
   MessageSquare,
   Plus,
+  Save,
   Star,
+  Trash2,
+  Upload,
   User,
   Users,
   X,
@@ -227,7 +231,7 @@ function AlumniProfile() {
   const hasProfileImage = Boolean(getProfileImagePath(alumni));
 
   return (
-    <div className="profile-page">
+    <div className="profile-page alumni-profile-page">
       <aside className="pf-sidebar">
         <div className="pf-logo">
           <BookOpen size={34} />
@@ -301,7 +305,7 @@ function AlumniProfile() {
           </div>
         </section>
 
-        <section className="pf-editor-grid">
+        <section className="pf-editor-grid alumni-editor-grid">
           <div className="pf-profile-card pf-photo-card">
             <div className="pf-avatar-large image-avatar">
               {profileImageUrl ? (
@@ -315,17 +319,30 @@ function AlumniProfile() {
             <p>{alumni.email}</p>
 
             <div className="pf-upload-box">
-              <input type="file" accept="image/*" onChange={handleImageChange} />
+              <input
+                id="alumni-profile-image"
+                className="pf-file-input"
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
+              />
+
+              <label htmlFor="alumni-profile-image" className="pf-file-trigger">
+                <Camera size={17} />
+                {hasProfileImage ? "Change photo" : "Choose photo"}
+              </label>
 
               {selectedImage ? (
-                <button onClick={uploadProfileImage}>Save Photo</button>
+                <button type="button" onClick={uploadProfileImage}>
+                  <Upload size={16} />
+                  Save Photo
+                </button>
               ) : hasProfileImage ? (
-                <button className="danger" onClick={removeProfileImage}>
+                <button type="button" className="danger" onClick={removeProfileImage}>
+                  <Trash2 size={16} />
                   Remove Photo
                 </button>
-              ) : (
-                <button onClick={uploadProfileImage}>Upload Photo</button>
-              )}
+              ) : null}
             </div>
 
             <div className="pf-info-list">
@@ -422,7 +439,10 @@ function AlumniProfile() {
             </div>
 
             <div className="pf-form-actions">
-              <button type="submit">Save Profile</button>
+              <button type="submit">
+                <Save size={17} />
+                Save Profile
+              </button>
             </div>
           </form>
 

@@ -1,105 +1,74 @@
-import React from "react";
-import Navbar from "../components/Navbar";
-import FeatureCard from "../components/FeatureCard";
-import StatCard from "../components/StatCard";
-import heroImage from "../assets/hero-graduation.png";
+import { ArrowRight, BriefcaseBusiness, CalendarDays, Check, MessageCircle, UsersRound } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import Navbar from "../components/Navbar";
+import heroImage from "../assets/hero-graduation.png";
 import { PROJECT_VERSION } from "../version";
+
+const features = [
+  { icon: UsersRound, title: "Meaningful mentorship", text: "Find alumni whose experience matches your goals and learn directly from them." },
+  { icon: BriefcaseBusiness, title: "Career opportunities", text: "Discover internships and jobs shared by people who know your institution." },
+  { icon: CalendarDays, title: "Events that matter", text: "Join workshops, meetups and sessions built around real career outcomes." },
+  { icon: MessageCircle, title: "A trusted community", text: "Ask questions, exchange ideas and build relationships that last beyond campus." },
+];
 
 function Home() {
   const navigate = useNavigate();
 
-  const handlesignUp= ()=>{
-    navigate("/signup");
-  }
   return (
     <div className="home-page">
-      <div className="project-version-badge">Version {PROJECT_VERSION}</div>
       <Navbar />
 
-      <section className="hero-section">
-        <div className="hero-content">
-          <p className="badge">AI Powered Alumni Student Platform</p>
-
-          <h1>
-            Connect <span>Students</span> with
-            <br />
-            Successful <span>Alumni</span>
-          </h1>
-
-          <p className="hero-text">
-            A smart platform where students discover mentors, events, jobs,
-            forum discussions and career opportunities from verified alumni.
-          </p>
-
-          <div className="hero-buttons">
-            <button className="btn primary large" onClick={handlesignUp}>Get Started →</button>
-            {/*<button className="btn ghost large">Explore Features</button>*/}
+      <main>
+        <section className="hero-section">
+          <div className="hero-content">
+            <div className="eyebrow"><span /> Your network starts here</div>
+            <h1>Where ambition meets <em>experience.</em></h1>
+            <p className="hero-text">A focused community where students find guidance and alumni create real impact—through mentorship, opportunity and shared knowledge.</p>
+            <div className="hero-buttons">
+              <button className="btn primary large" onClick={() => navigate("/signup")}>Join the community <ArrowRight size={18} /></button>
+              <button className="btn ghost large" onClick={() => navigate("/login")}>I already have an account</button>
+            </div>
+            <div className="hero-proof">
+              <span><Check size={15} /> Free to join</span>
+              <span><Check size={15} /> Built for students & alumni</span>
+            </div>
           </div>
 
-          <div className="mini-info">
-            
-            <p>Trusted by students and alumni for career growth</p>
+          <div className="hero-visual">
+            <div className="hero-image-frame">
+              <img src={heroImage} alt="Graduates celebrating their achievement" />
+            </div>
+            <div className="floating-note note-top"><strong>One community</strong><span>Endless possibilities</span></div>
+            <div className="floating-note note-bottom"><div className="note-icon"><UsersRound size={22} /></div><div><strong>Connect & grow</strong><span>With people who understand</span></div></div>
           </div>
-        </div>
+        </section>
 
-        <div className="hero-visual">
-          <div className="image-glow"></div>
-          <img src={heroImage} alt="Graduation illustration" />
-
-          
-        </div>
-      </section>
-
-      <section className="features-grid">
-        <FeatureCard
-          icon="🤝"
-          title="Mentorship"
-          text="Students can request mentorship and alumni can guide them."
-        />
-        <FeatureCard
-          icon="💼"
-          title="Jobs"
-          text="Alumni can post job opportunities for students."
-        />
-        <FeatureCard
-          icon="📅"
-          title="Events"
-          text="Skill-based event recommendation and registration."
-        />
-        <FeatureCard
-          icon="💬"
-          title="Forum"
-          text="Students ask questions and alumni answer them."
-        />
-      </section>
-
-      <section className="how-section">
-        <h2>
-          How It <span>Works</span>
-        </h2>
-        <p>Start your journey in a few simple steps</p>
-
-        <div className="steps">
-          <div className="step-card">
-            <span>01</span>
-            <h3>Create Account</h3>
-            <p>Register as a student or alumni.</p>
+        <section className="features-section">
+          <div className="section-intro">
+            <div><span className="section-kicker">Everything in one place</span><h2>Built for the next step in your journey.</h2></div>
+            <p>From the first question to the first job, the platform brings the right people and opportunities closer.</p>
           </div>
-
-          <div className="step-card">
-            <span>02</span>
-            <h3>Explore Dashboard</h3>
-            <p>Access mentorship, events, jobs and forum.</p>
+          <div className="features-grid">
+            {features.map(({ icon: Icon, title, text }, index) => (
+              <article className="feature-card" key={title}>
+                <div className="feature-number">0{index + 1}</div>
+                <div className="feature-icon"><Icon size={23} /></div>
+                <h3>{title}</h3><p>{text}</p>
+              </article>
+            ))}
           </div>
+        </section>
 
-          <div className="step-card">
-            <span>03</span>
-            <h3>Connect & Grow</h3>
-            <p>Build career connections and opportunities.</p>
-          </div>
-        </div>
-      </section>
+        <section className="home-cta">
+          <div><span className="section-kicker light">Your next chapter</span><h2>Build the connection that changes everything.</h2></div>
+          <button className="btn cta-button" onClick={() => navigate("/signup")}>Create your account <ArrowRight size={18} /></button>
+        </section>
+      </main>
+      <footer className="home-footer">
+        <span>Alumni Student Interaction Platform · v{PROJECT_VERSION}</span>
+        <span>Built by <strong>VijayaKumar</strong> and <strong>Naveen Anandhan</strong></span>
+        <span>Connect. Learn. Grow.</span>
+      </footer>
     </div>
   );
 }

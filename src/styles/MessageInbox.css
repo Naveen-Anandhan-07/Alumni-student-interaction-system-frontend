@@ -2,6 +2,7 @@
   display: grid;
   grid-template-columns: 300px 1fr;
   height: 580px;
+  min-height: 0;
   margin-top: 24px;
   background: white;
   border: 1px solid #e6e1f5;
@@ -10,8 +11,9 @@
 }
 
 .message-inbox.page {
-  height: calc(100vh - 310px);
-  min-height: 560px;
+  height: 700px;
+  min-height: 0;
+  flex: 0 0 auto;
   margin-top: 0;
 }
 
@@ -27,12 +29,17 @@
 
 .message-conversations {
   overflow-y: auto;
+  min-height: 0;
   border-right: 1px solid #eee;
 }
 
 .message-title {
+  position: sticky;
+  top: 0;
+  z-index: 1;
   padding: 20px;
   border-bottom: 1px solid #eee;
+  background: white;
 }
 
 .message-title h2 {
@@ -97,10 +104,13 @@
 .message-chat {
   display: flex;
   min-width: 0;
+  min-height: 0;
   flex-direction: column;
+  overflow: hidden;
 }
 
 .message-chat-header {
+  flex-shrink: 0;
   padding: 18px 22px;
   border-bottom: 1px solid #eee;
 }
@@ -114,11 +124,22 @@
   font-size: 12px;
 }
 
-.message-list {
+.message-list-wrap {
+  position: relative;
   flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.message-list {
+  height: 100%;
+  min-height: 0;
   overflow-y: auto;
+  overflow-x: hidden;
   padding: 20px;
   background: #faf9ff;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
 }
 
 .message-row {
@@ -159,6 +180,7 @@
 
 .message-form {
   display: flex;
+  flex-shrink: 0;
   gap: 10px;
   padding: 15px;
   border-top: 1px solid #eee;
@@ -183,18 +205,47 @@
   opacity: 0.5;
 }
 
+.scroll-to-latest {
+  position: absolute;
+  right: 20px;
+  bottom: 16px;
+  z-index: 2;
+  min-height: 36px;
+  padding: 0 13px;
+  border: 1px solid #d5c8ff;
+  border-radius: 999px;
+  background: white;
+  color: #4b1fb8;
+  box-shadow: 0 8px 24px rgba(23, 5, 63, 0.16);
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
 @media (max-width: 800px) {
+  .message-inbox.page {
+    height: max(460px, calc(100vh - 180px));
+  }
+
   .message-inbox {
     grid-template-columns: 1fr;
-    height: auto;
+    grid-template-rows: minmax(110px, 32%) minmax(0, 1fr);
+    height: 100%;
+    min-height: 0;
   }
 
   .message-conversations {
-    max-height: 240px;
+    min-height: 0;
+    max-height: none;
+    overflow-y: auto;
     border-right: 0;
+    border-bottom: 1px solid #eee;
   }
 
   .message-chat {
-    height: 500px;
+    min-height: 0;
+    height: auto;
   }
 }
