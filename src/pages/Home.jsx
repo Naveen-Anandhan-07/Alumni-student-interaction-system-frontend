@@ -66,7 +66,6 @@ function Home() {
       </main>
       <footer className="home-footer">
         <span>Alumni Student Interaction Platform · v{PROJECT_VERSION}</span>
-        <span>Built by <strong>VijayaKumar</strong> and <strong>Naveen Anandhan</strong></span>
         <span>Connect. Learn. Grow.</span>
       </footer>
     </div>
