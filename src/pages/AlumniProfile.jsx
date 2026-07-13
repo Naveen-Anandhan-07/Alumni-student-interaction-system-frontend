@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { toast } from "../utils/toast";
 import { useNavigate } from "react-router-dom";
 import {
   Bell,
@@ -87,7 +88,7 @@ function AlumniProfile() {
       });
     } catch (error) {
       console.log(error);
-      alert("Failed to load alumni profile");
+      toast("Failed to load alumni profile");
     }
 
     setLoading(false);
@@ -155,10 +156,10 @@ function AlumniProfile() {
         JSON.stringify({ ...storedUser, name: updatedAlumni.name })
       );
 
-      alert("Profile updated");
+      toast("Profile updated");
     } catch (error) {
       console.log(error);
-      alert(error.response?.data?.message || "Failed to update profile");
+      toast(error.response?.data?.message || "Failed to update profile");
     }
   };
 
@@ -175,7 +176,7 @@ function AlumniProfile() {
 
   const uploadProfileImage = async () => {
     if (!selectedImage) {
-      alert("Please select an image first");
+      toast("Please select an image first");
       return;
     }
 
@@ -192,10 +193,10 @@ function AlumniProfile() {
       setAlumni(res.data);
       setSelectedImage(null);
       setPreviewImage(null);
-      alert("Profile picture updated");
+      toast("Profile picture updated");
     } catch (error) {
       console.log(error);
-      alert("Image upload failed");
+      toast("Image upload failed");
     }
   };
 
@@ -206,10 +207,10 @@ function AlumniProfile() {
       setAlumni(res.data);
       setSelectedImage(null);
       setPreviewImage(null);
-      alert("Profile picture removed");
+      toast("Profile picture removed");
     } catch (error) {
       console.log(error);
-      alert("Image remove failed");
+      toast("Image remove failed");
     }
   };
 

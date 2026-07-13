@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { toast } from "../utils/toast";
 import { useNavigate } from "react-router-dom";
 import {
   ArrowRight,
@@ -92,7 +93,7 @@ function StudentDashboard() {
       setEvents(eventResponse.data);
     } catch (error) {
       console.log(error);
-      alert("Failed to load dashboard");
+      toast("Failed to load dashboard");
     }
 
     setLoading(false);
@@ -110,13 +111,13 @@ function StudentDashboard() {
         `/jobs/applications/${applicationId}/cancel`
       );
 
-      alert("Application cancelled");
+      toast("Application cancelled");
 
       const user = JSON.parse(localStorage.getItem("user"));
       loadDashboard(user.profileId);
     } catch (error) {
       console.log(error);
-      alert("Failed to cancel application");
+      toast("Failed to cancel application");
     }
   };
 
@@ -126,11 +127,11 @@ function StudentDashboard() {
 
       await api.post(`/jobs/${jobId}/apply/${user.profileId}`);
 
-      alert("Applied successfully");
+      toast("Applied successfully");
       loadDashboard(user.profileId);
     } catch (error) {
       console.log(error);
-      alert(error.response?.data?.message || "Application failed");
+      toast(error.response?.data?.message || "Application failed");
     }
   };
 
@@ -142,12 +143,12 @@ function StudentDashboard() {
         `/events/${eventId}/register/${user.profileId}`
       );
 
-      alert("Event registered successfully");
+      toast("Event registered successfully");
 
       loadDashboard(user.profileId);
     } catch (error) {
       console.log(error);
-      alert(
+      toast(
         error.response?.data?.message ||
           "Event registration failed"
       );

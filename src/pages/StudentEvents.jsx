@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { toast } from "../utils/toast";
 import { useNavigate } from "react-router-dom";
 import {
   Search,
@@ -78,15 +79,15 @@ function StudentEvents() {
       const user = JSON.parse(localStorage.getItem("user"));
 
       await api.post(`/events/${eventId}/register/${user.profileId}`);
-      alert("Event registered successfully");
+      toast("Event registered successfully");
       loadEvents(user.profileId);
     } catch (error) {
       console.log(error);
 
       if (error.response && error.response.data) {
-        alert(error.response.data.message || "Registration failed");
+        toast(error.response.data.message || "Registration failed");
       } else {
-        alert("Registration failed");
+        toast("Registration failed");
       }
     }
   };

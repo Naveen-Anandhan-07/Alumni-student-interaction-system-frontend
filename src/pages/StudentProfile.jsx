@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { toast } from "../utils/toast";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   Bell,
@@ -90,7 +91,7 @@ function StudentProfile() {
 
 const uploadResume = async () => {
   if (!selectedResume) {
-    alert("Please select a resume PDF");
+    toast("Please select a resume PDF");
     return;
   }
 
@@ -106,10 +107,10 @@ const uploadResume = async () => {
 
     setStudent(res.data);
     setSelectedResume(null);
-    alert("Resume uploaded successfully");
+    toast("Resume uploaded successfully");
   } catch (error) {
     console.log(error);
-    alert("Resume upload failed");
+    toast("Resume upload failed");
   }
 };
 
@@ -130,7 +131,7 @@ const uploadResume = async () => {
       });
     } catch (error) {
       console.log(error);
-      alert("Failed to load student profile");
+      toast("Failed to load student profile");
     }
 
     setLoading(false);
@@ -200,10 +201,10 @@ const uploadResume = async () => {
         JSON.stringify({ ...storedUser, name: updatedStudent.name })
       );
 
-      alert("Profile updated");
+      toast("Profile updated");
     } catch (error) {
       console.log(error);
-      alert(error.response?.data?.message || "Failed to update profile");
+      toast(error.response?.data?.message || "Failed to update profile");
     }
   };
 
@@ -220,7 +221,7 @@ const uploadResume = async () => {
 
   const uploadProfileImage = async () => {
     if (!selectedImage) {
-      alert("Please select an image first");
+      toast("Please select an image first");
       return;
     }
 
@@ -237,10 +238,10 @@ const uploadResume = async () => {
       setStudent(res.data);
       setSelectedImage(null);
       setPreviewImage(null);
-      alert("Profile picture updated");
+      toast("Profile picture updated");
     } catch (error) {
       console.log(error);
-      alert("Image upload failed");
+      toast("Image upload failed");
     }
   };
 
@@ -251,10 +252,10 @@ const uploadResume = async () => {
       setStudent(res.data);
       setSelectedImage(null);
       setPreviewImage(null);
-      alert("Profile picture removed");
+      toast("Profile picture removed");
     } catch (error) {
       console.log(error);
-      alert("Image remove failed");
+      toast("Image remove failed");
     }
   };
 

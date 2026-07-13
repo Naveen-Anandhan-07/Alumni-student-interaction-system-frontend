@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { toast } from "../utils/toast";
 import { useNavigate } from "react-router-dom";
 import {
   Bell,
@@ -74,7 +75,7 @@ function Notifications() {
       setNotifications(response.data || []);
     } catch (error) {
       console.log(error);
-      alert("Failed to load notifications");
+      toast("Failed to load notifications");
     }
 
     setLoading(false);
@@ -98,7 +99,7 @@ function Notifications() {
       refreshNotifications();
     } catch (error) {
       console.log(error);
-      alert("Failed to mark notification as read");
+      toast("Failed to mark notification as read");
     }
   };
 
@@ -113,7 +114,7 @@ function Notifications() {
       refreshNotifications();
     } catch (error) {
       console.log(error);
-      alert("Failed to delete notification");
+      toast("Failed to delete notification");
     }
   };
 

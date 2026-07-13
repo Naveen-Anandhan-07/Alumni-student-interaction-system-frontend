@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { toast } from "../utils/toast";
 import {
   Bell,
   BookOpen,
@@ -85,11 +86,11 @@ function StudentJobs() {
       const user = JSON.parse(localStorage.getItem("user"));
 
       await api.post(`/jobs/${jobId}/apply/${user.profileId}`);
-      alert("Applied successfully");
+      toast("Applied successfully");
       loadJobs(user.profileId);
     } catch (error) {
       console.log(error);
-      alert(error.response?.data?.message || "Application failed");
+      toast(error.response?.data?.message || "Application failed");
     }
   };
 
@@ -98,11 +99,11 @@ function StudentJobs() {
       const user = JSON.parse(localStorage.getItem("user"));
 
       await api.put(`/jobs/applications/${applicationId}/cancel`);
-      alert("Application cancelled");
+      toast("Application cancelled");
       loadJobs(user.profileId);
     } catch (error) {
       console.log(error);
-      alert(error.response?.data?.message || "Cancel failed");
+      toast(error.response?.data?.message || "Cancel failed");
     }
   };
 

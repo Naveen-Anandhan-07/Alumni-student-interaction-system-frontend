@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { toast } from "../utils/toast";
 import {
   Bell,
   BookOpen,
@@ -77,7 +78,7 @@ function AlumniJobs() {
       setMyJobs(myRes.data);
     } catch (error) {
       console.log(error);
-      alert("Failed to load jobs");
+      toast("Failed to load jobs");
     } finally {
       setLoading(false);
     }
@@ -116,7 +117,7 @@ function AlumniJobs() {
     try {
       await api.post("/jobs", jobForm);
 
-      alert("Job posted successfully");
+      toast("Job posted successfully");
 
       setShowForm(false);
 
@@ -125,7 +126,7 @@ function AlumniJobs() {
       loadJobs(jobForm.alumniId);
     } catch (error) {
       console.log(error);
-      alert("Failed to post job");
+      toast("Failed to post job");
     }
   };
 
@@ -136,14 +137,14 @@ function AlumniJobs() {
       setShowApplicants(true);
     } catch (error) {
       console.log(error);
-      alert("Failed to load applicants");
+      toast("Failed to load applicants");
     }
   };
 
   const updateStatus = async (applicationId, status) => {
     try {
       await api.put(`/jobs/applications/${applicationId}/status?status=${status}`);
-      alert("Status updated");
+      toast("Status updated");
 
       const updated = applicants.map((app) =>
         app.applicationId === applicationId ? { ...app, status } : app
@@ -152,13 +153,13 @@ function AlumniJobs() {
       setApplicants(updated);
     } catch (error) {
       console.log(error);
-      alert("Failed to update status");
+      toast("Failed to update status");
     }
   };
 
   const viewStudentProfile = (studentId) => {
     if (!studentId) {
-      alert("Student profile is not available for this application.");
+      toast("Student profile is not available for this application.");
       return;
     }
 

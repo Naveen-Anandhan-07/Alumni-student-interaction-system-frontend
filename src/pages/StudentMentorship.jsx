@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { toast } from "../utils/toast";
 import {
   Bell,
   BookOpen,
@@ -68,7 +69,7 @@ function StudentMentorship() {
       setMentorships(requestRes.data);
     } catch (error) {
       console.log(error);
-      alert("Failed to load mentorship data");
+      toast("Failed to load mentorship data");
     } finally {
       setLoading(false);
     }
@@ -90,19 +91,19 @@ function StudentMentorship() {
 
   const sendMentorshipRequest = async (alumniId) => {
     if (hasAcceptedMentor) {
-      alert("You already have a mentor. You cannot request another alumni.");
+      toast("You already have a mentor. You cannot request another alumni.");
       return;
     }
 
     if (hasAnyPendingRequest) {
-      alert("You already have a pending mentorship request.");
+      toast("You already have a pending mentorship request.");
       return;
     }
 
     const message = requestMessage.trim();
 
     if (!message) {
-      alert("Please write a short message for your mentorship request.");
+      toast("Please write a short message for your mentorship request.");
       return;
     }
 
@@ -113,13 +114,13 @@ function StudentMentorship() {
         message,
       });
 
-      alert("Mentorship request sent successfully");
+      toast("Mentorship request sent successfully");
       setActiveRequestAlumniId(null);
       setRequestMessage("");
       loadData(user.profileId);
     } catch (error) {
       console.log(error);
-      alert("Failed to send mentorship request");
+      toast("Failed to send mentorship request");
     }
   };
 
