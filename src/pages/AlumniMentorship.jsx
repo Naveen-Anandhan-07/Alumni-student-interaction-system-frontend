@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { toast } from "../utils/toast";
 import { useNavigate } from "react-router-dom";
 import {
   Bell,
@@ -62,7 +63,7 @@ function AlumniMentorship() {
       setMentorships(response.data || []);
     } catch (error) {
       console.log(error);
-      alert("Failed to load mentorships");
+      toast("Failed to load mentorships");
     }
 
     setLoading(false);
@@ -74,11 +75,11 @@ function AlumniMentorship() {
         `/mentorships/${mentorshipId}/accept`
       );
 
-      alert("Mentorship request accepted");
+      toast("Mentorship request accepted");
       loadMentorships(user.profileId);
     } catch (error) {
       console.log(error);
-      alert(
+      toast(
         error.response?.data?.message ||
           "Failed to accept request"
       );
@@ -91,11 +92,11 @@ function AlumniMentorship() {
         `/mentorships/${mentorshipId}/reject`
       );
 
-      alert("Mentorship request rejected");
+      toast("Mentorship request rejected");
       loadMentorships(user.profileId);
     } catch (error) {
       console.log(error);
-      alert(
+      toast(
         error.response?.data?.message ||
           "Failed to reject request"
       );

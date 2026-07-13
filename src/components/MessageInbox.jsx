@@ -1,4 +1,5 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { toast } from "../utils/toast";
 import { ArrowDown } from "lucide-react";
 import { useMessages } from "../context/MessageContext";
 import { getProfileInitial } from "../utils/profileImage";
@@ -174,7 +175,7 @@ function MessageInbox({ page = false }) {
       scrollToLatest("smooth");
     } catch {
       forceScrollAfterSendRef.current = false;
-      alert("Unable to send message");
+      toast("Unable to send message");
     }
   };
 

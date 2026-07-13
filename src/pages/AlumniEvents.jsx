@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { toast } from "../utils/toast";
 import { backendAssetUrl } from "../config/environment";
 import {
   Bell,
@@ -84,7 +85,7 @@ function AlumniEvents() {
       setMyEvents(myRes.data);
     } catch (error) {
       console.log(error);
-      alert("Failed to load events");
+      toast("Failed to load events");
     } finally {
       setLoading(false);
     }
@@ -142,7 +143,7 @@ function AlumniEvents() {
     try {
       await api.post("/events", formData);
 
-      alert("Event posted successfully");
+      toast("Event posted successfully");
 
       setShowForm(false);
       setImage(null);
@@ -152,7 +153,7 @@ function AlumniEvents() {
       loadEvents(eventForm.alumniId);
     } catch (error) {
       console.log(error);
-      alert("Failed to post event");
+      toast("Failed to post event");
     }
   };
 

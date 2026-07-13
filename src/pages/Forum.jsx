@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { toast } from "../utils/toast";
 import { useNavigate } from "react-router-dom";
 import {
   Bell,
@@ -77,7 +78,7 @@ function Forum() {
       setQuestions(res.data);
     } catch (error) {
       console.log(error);
-      alert("Failed to load forum questions");
+      toast("Failed to load forum questions");
     }
   };
 
@@ -92,7 +93,7 @@ function Forum() {
       setQuestions(res.data);
     } catch (error) {
       console.log(error);
-      alert("Search failed");
+      toast("Search failed");
     }
   };
 
@@ -100,7 +101,7 @@ function Forum() {
     e.preventDefault();
 
     if (user.role !== "STUDENT") {
-      alert("Only students can ask questions");
+      toast("Only students can ask questions");
       return;
     }
 
@@ -113,10 +114,10 @@ function Forum() {
 
       setQuestionForm({ title: "", description: "" });
       fetchQuestions();
-      alert("Question posted successfully");
+      toast("Question posted successfully");
     } catch (error) {
       console.log(error);
-      alert("Failed to post question");
+      toast("Failed to post question");
     }
   };
 
@@ -131,7 +132,7 @@ function Forum() {
       fetchQuestions();
     } catch (error) {
       console.log(error);
-      alert(error.response?.data || "Already liked or like failed");
+      toast(error.response?.data || "Already liked or like failed");
     }
   };
 

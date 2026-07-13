@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { toast } from "../utils/toast";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   ArrowLeft,
@@ -89,7 +90,7 @@ function ForumQuestion() {
     e.preventDefault();
 
     if (user.role !== "ALUMNI") {
-      alert("Only alumni can answer questions");
+      toast("Only alumni can answer questions");
       return;
     }
 
@@ -117,7 +118,7 @@ function ForumQuestion() {
       loadAnswers();
     } catch (error) {
       console.log(error);
-      alert(error.response?.data || "Already marked helpful or action failed");
+      toast(error.response?.data || "Already marked helpful or action failed");
     }
   };
 

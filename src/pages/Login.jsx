@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { toast } from "../utils/toast";
 import { ArrowLeft, ArrowRight, Eye, EyeOff, GraduationCap } from "lucide-react";
 import "../styles/Auth.css";
 import { useNavigate } from "react-router-dom";
@@ -18,7 +19,7 @@ function Login() {
       window.dispatchEvent(new Event("auth-changed"));
       navigate(res.data.role === "STUDENT" ? "/student/dashboard" : "/alumni/dashboard");
     } catch (error) {
-      alert("Invalid email or password");
+      toast("Invalid email or password");
       console.log(error);
     }
   };
