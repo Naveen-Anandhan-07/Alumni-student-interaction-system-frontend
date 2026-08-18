@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import api from "../services/api";
+import { backendAssetUrl } from "../config/environment";
 import LoadingState from "../components/LoadingState";
 import "../styles/StudentMentorship.css";
 import { getProfileImageUrl, getProfileInitial } from "../utils/profileImage";
@@ -395,7 +396,7 @@ function AlumniCard({
       <div className="sm-alumni-image">
         {alumni.imageUrl ? (
           <img
-            src={backendasseturl(alumni.imageUrl)}
+            src={backendAssetUrl(alumni.imageUrl)}
             alt={alumni.name}
           />
         ) : (
