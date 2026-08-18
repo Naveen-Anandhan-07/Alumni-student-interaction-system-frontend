@@ -18,6 +18,7 @@ import {
   Users,
 } from "lucide-react";
 import api from "../services/api";
+import { backendAssetUrl } from "../config/environment";
 import LoadingState from "../components/LoadingState";
 import "../styles/StudentDashboard.css";
 import "../styles/StudentJobs.css";
